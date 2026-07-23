@@ -1,0 +1,141 @@
+@page
+@{
+    ViewData["Title"] = "Paramètres";
+    Layout = "_DashboardLayout";
+}
+
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h1>Paramètres de la Boutique</h1>
+        <p>Personnalisez le nom et le logo de votre entreprise pour les reçus.</p>
+    </div>
+</div>
+
+<div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; max-width: 1000px; margin: 0 auto;">
+    
+    <!-- Paramètres Card -->
+    <div class="glass-card" style="padding: 2rem;">
+        <h3 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Informations sur la Boutique</h3>
+        <form id="settingsForm" onsubmit="saveSettings(event)">
+            <div class="form-group">
+                <label>Nom de la Boutique</label>
+                <input type="text" id="shopName" placeholder="Ex: Ma Super Boutique">
+            </div>
+            
+            <div class="form-group">
+                <label>Logo de la Boutique</label>
+                <input type="file" id="shopLogo" accept="image/*" onchange="previewLogo(event)">
+                <div style="margin-top: 1rem; text-align: center;">
+                    <img id="logoPreview" src="" style="max-width: 150px; max-height: 150px; display: none; border-radius: 8px; border: 1px solid var(--border-color);">
+                </div>
+            </div>
+
+            <div class="modal-actions" style="margin-top: 2rem;">
+                <button type="submit" class="btn-primary" style="width: 100%;">Enregistrer les paramètres</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- À propos du développeur Card -->
+    <div class="glass-card" style="padding: 2rem; display: flex; flex-direction: column; align-items: center; text-align: center;">
+        <h3 style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; width: 100%; text-align: left;">À propos du développeur</h3>
+        
+        <div style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #60a5fa); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; font-size: 2.5rem; color: white; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);">
+            <i class="fa-solid fa-laptop-code"></i>
+        </div>
+        
+        <h2 style="margin-bottom: 0.2rem; color: var(--text-primary); font-size: 1.5rem;">Yaovi S. Olivier SOSSOU</h2>
+        <p style="color: var(--primary); font-weight: 500; margin-bottom: 1.5rem;">Développeur Full-Stack & Concepteur</p>
+        
+        <div style="width: 100%; text-align: left; background: var(--bg-color); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color);">
+            <p style="margin-bottom: 1rem; display: flex; align-items: center; gap: 12px;">
+                <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(37,99,235,0.1); color: var(--primary);">
+                    <i class="fa-solid fa-envelope"></i>
+                </span>
+                <span style="color: var(--text-secondary);">oliviersossou228@gmail.com</span>
+            </p>
+            <p style="margin-bottom: 1rem; display: flex; align-items: center; gap: 12px;">
+                <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(37,99,235,0.1); color: var(--primary);">
+                    <i class="fa-solid fa-phone"></i>
+                </span>
+                <span style="color: var(--text-secondary);">+228 93 00 43 63</span>
+            </p>
+            <p style="display: flex; align-items: center; gap: 12px;">
+                <span style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(37,99,235,0.1); color: var(--primary);">
+                    <i class="fa-brands fa-linkedin"></i>
+                </span>
+                <a href="https://www.linkedin.com/in/yaovi-sessi-olivier-sossou-6550432b3/" target="_blank" style="color: var(--text-secondary); text-decoration: none; word-break: break-all;">Profil LinkedIn</a>
+            </p>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        let currentLogoBase64 = '';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const resp = await fetch('/api/settings');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    document.getElementById('shopName').value = data.shopName || '';
+                    if (data.logoBase64) {
+                        currentLogoBase64 = data.logoBase64;
+                        document.getElementById('logoPreview').src = data.logoBase64;
+                        document.getElementById('logoPreview').style.display = 'inline-block';
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        });
+
+        function previewLogo(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentLogoBase64 = e.target.result;
+                document.getElementById('logoPreview').src = currentLogoBase64;
+                document.getElementById('logoPreview').style.display = 'inline-block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function saveSettings(e) {
+            e.preventDefault();
+            const token = localStorage.getItem("jwtToken");
+            if (!token) return;
+
+            const payload = {
+                shopName: document.getElementById('shopName').value,
+                logoBase64: currentLogoBase64
+            };
+
+            try {
+                const resp = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!resp.ok) throw new Error('Erreur lors de la sauvegarde');
+                showToast('Paramètres enregistrés avec succès', 'success');
+                
+                // Force global UI update if possible
+                if (typeof loadGlobalSettings === 'function') {
+                    loadGlobalSettings();
+                }
+            } catch (error) {
+                console.error(error);
+                showToast("Erreur: " + error.message, "danger");
+            }
+        }
+    </script>
+}

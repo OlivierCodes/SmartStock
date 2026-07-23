@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SmartStock</title>
+    
+    <!-- Google Fonts: Inter & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Premium Dashboard Style -->
+    <link rel="stylesheet" href="~/css/premium-dashboard.css" asp-append-version="true" />
+    
+    <!-- Theme Initializer to prevent flash of dark theme -->
+    <script>
+        (function () {
+            const theme = localStorage.getItem('theme') || 'dark';
+            if (theme === 'light') {
+                document.documentElement.classList.add('light-theme');
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div class="bg-gradients">
+        <div class="gradient-1"></div>
+        <div class="gradient-2"></div>
+        <div class="gradient-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>SmartStock</span>
+                </div>
+            </div>
+            
+            <ul class="nav-menu">
+                @{
+                    var currentRoute = ViewContext.RouteData.Values["page"]?.ToString() ?? "";
+                }
+                <li class="nav-item @(currentRoute.StartsWith("/Dashboard") ? "active" : "")">
+                    <a href="/Dashboard" class="nav-link">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Tableau de bord</span>
+                    </a>
+                </li>
+                <li class="nav-item @(currentRoute.StartsWith("/Products") ? "active" : "")">
+                    <a href="/Products" class="nav-link">
+                        <i class="fa-solid fa-box-open"></i>
+                        <span>Produits</span>
+                    </a>
+                </li>
+                <li class="nav-item @(currentRoute.StartsWith("/Sales") ? "active" : "")">
+                    <a href="/Sales" class="nav-link">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span>Ventes</span>
+                    </a>
+                </li>
+                <li class="nav-item @(currentRoute.StartsWith("/StockMovements") ? "active" : "")">
+                    <a href="/StockMovements" class="nav-link">
+                        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                        <span>Mouvements</span>
+                    </a>
+                </li>
+                <li class="nav-item @(currentRoute.StartsWith("/Users") ? "active" : "")">
+                    <a href="/Users" class="nav-link">
+                        <i class="fa-solid fa-users"></i>
+                        <span>Utilisateurs</span>
+                    </a>
+                </li>
+                <li class="nav-item @(currentRoute.StartsWith("/Settings") ? "active" : "")">
+                    <a href="/Settings" class="nav-link">
+                        <i class="fa-solid fa-gear"></i>
+                        <span>Paramètres</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <a href="/Login" class="nav-link logout-btn" onclick="localStorage.removeItem('jwtToken')">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Déconnexion</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="btn-icon" id="sidebarToggle" onclick="toggleSidebar()" style="color: var(--text-primary); font-size: 1.25rem; background: transparent; border: none; cursor: pointer;">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="search-bar">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" placeholder="Rechercher...">
+                    </div>
+                </div>
+                <div class="user-profile">
+                    <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Changer de thème">
+                        <i class="fa-solid fa-moon" id="themeToggleIcon"></i>
+                    </button>
+                    <div class="notification-icon">
+                        <i class="fa-regular fa-bell"></i>
+                        <span class="badge">3</span>
+                    </div>
+                    <div class="avatar">
+                        <img src="" alt="User Avatar" style="display: none;" onload="this.style.display='block'">
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name" style="color: var(--text-muted);">Chargement...</span>
+                        <span class="user-role" style="color: var(--text-muted);">...</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-wrapper">
+                @RenderBody()
+            </div>
+        </main>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Global Confirm Modal -->
+    <div id="globalConfirmModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 400px; text-align: center; padding: 2rem;">
+            <div style="font-size: 3rem; color: var(--danger); margin-bottom: 1rem;">
+                <i class="fa-solid fa-circle-exclamation"></i>
+            </div>
+            <h2 style="margin-bottom: 1rem;">Confirmation</h2>
+            <p id="globalConfirmMessage" style="color: var(--text-secondary); margin-bottom: 2rem;"></p>
+            <div class="modal-actions" style="justify-content: center; gap: 1rem;">
+                <button type="button" class="btn-secondary" onclick="closeConfirmModal()">Annuler</button>
+                <button type="button" class="btn-danger" id="globalConfirmBtn" style="background: var(--danger);">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set the initial icon based on the active theme
+        document.addEventListener('DOMContentLoaded', () => {
+            const isLight = document.documentElement.classList.contains('light-theme');
+            const icon = document.getElementById('themeToggleIcon');
+            if (icon) {
+                if (isLight) {
+                    icon.className = 'fa-solid fa-sun';
+                } else {
+                    icon.className = 'fa-solid fa-moon';
+                }
+            }
+
+            // Role-Based Access Control (RBAC) & User Info
+            const token = localStorage.getItem("jwtToken");
+            if (token) {
+                try {
+                    const payloadBase64 = token.split('.')[1];
+                    const payload = JSON.parse(atob(payloadBase64.replace(/-/g, '+').replace(/_/g, '/')));
+                    
+                    const role = payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+                    
+                    const firstName = payload["firstName"] || "";
+                    const lastName = payload["lastName"] || "";
+                    let name = (firstName + " " + lastName).trim();
+                    const email = payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"] || payload["email"] || name;
+
+                    if (!name && email) {
+                        name = email.split('\x40')[0];
+                    }
+
+                    // Mettre à jour l'en-tête (Topbar)
+                    const userNameEl = document.querySelector('.user-name');
+                    const userRoleEl = document.querySelector('.user-role');
+                    const avatarImg = document.querySelector('.avatar img');
+                    
+                    if (userNameEl && name) {
+                        userNameEl.innerText = email; // Le client veut voir l'email ici
+                        userNameEl.style.color = "var(--text-primary)";
+                    }
+                    if (userRoleEl && role) {
+                        userRoleEl.innerText = role;
+                        userRoleEl.style.color = "var(--text-secondary)";
+                    }
+                    if (avatarImg && name) {
+                        avatarImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6366f1&color=fff`;
+                    }
+
+                    // Masquer les menus en fonction du rôle
+                    const navItems = document.querySelectorAll('.nav-item');
+                    navItems.forEach(item => {
+                        const href = item.querySelector('a').getAttribute('href');
+                        
+                        if (role === 'Vendeur') {
+                            if (href !== '/Dashboard' && href !== '/Sales') {
+                                item.style.display = 'none';
+                            }
+                        } else if (role === 'Magasinier') {
+                            if (href === '/Users' || href === '/Settings') {
+                                item.style.display = 'none';
+                            }
+                        }
+                    });
+                } catch (e) {
+                    console.error("Erreur de décodage JWT", e);
+                }
+            } else if (window.location.pathname !== "/Login") {
+                window.location.href = "/Login";
+            }
+        });
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('themeToggleIcon');
+            
+            if (html.classList.contains('light-theme')) {
+                html.classList.remove('light-theme');
+                localStorage.setItem('theme', 'dark');
+                if (icon) icon.className = 'fa-solid fa-moon';
+            } else {
+                html.classList.add('light-theme');
+                localStorage.setItem('theme', 'light');
+                if (icon) icon.className = 'fa-solid fa-sun';
+            }
+        }
+
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('collapsed');
+            document.querySelector('.main-content').classList.toggle('expanded');
+        }
+
+        // Global Toast Notification System
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            let icon = 'fa-check-circle';
+            if (type === 'danger') icon = 'fa-circle-xmark';
+            if (type === 'warning') icon = 'fa-triangle-exclamation';
+
+            toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Global Confirm Modal System
+        let currentConfirmCallback = null;
+
+        function showConfirmModal(message, onConfirm) {
+            document.getElementById('globalConfirmMessage').innerText = message;
+            currentConfirmCallback = onConfirm;
+            document.getElementById('globalConfirmModal').classList.add('show');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('globalConfirmModal').classList.remove('show');
+            currentConfirmCallback = null;
+        }
+
+        document.getElementById('globalConfirmBtn').addEventListener('click', () => {
+            if (currentConfirmCallback) {
+                currentConfirmCallback();
+            }
+            closeConfirmModal();
+        });
+
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SmartStock</title>
+    
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="bg-gradients">
+        <div class="gradient-1"></div>
+        <div class="gradient-2"></div>
+    </div>
+
+    <header>
+        <nav class="navbar">
+            <a class="logo" href="/">
+                <span>SmartStock</span>
+            </a>
+            <ul class="nav-links">
+                <li><a class="nav-link" href="/">Accueil</a></li>
+                <li><a class="nav-link" href="/swagger">Swagger API</a></li>
+                <li><a class="btn-swagger" href="/swagger">Explorer l'API</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <footer>
+        <p>&copy; @DateTime.UtcNow.Year - SmartStock. Conçu pour les commerçants du Grand Marché de Lomé.</p>
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

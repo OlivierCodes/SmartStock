@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tableau de bord SmartStock</title>
+    <meta name="description" content="Dashboard interactif pour le responsable de SmartStock, affichant les KPI, alertes de stock et produits les plus vendus." />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+    <main class="dashboard">
+        <header class="header">
+            <h1>📊 Tableau de bord SmartStock</h1>
+        </header>
+        <section class="kpi-grid" id="kpi-grid">
+            <!-- KPI cards will be injected here -->
+        </section>
+        <section class="top-products" id="top-products">
+            <h2>Top Produits du mois</h2>
+            <ul class="product-list"></ul>
+        </section>
+        <section class="low-stock" id="low-stock">
+            <h2>Alertes stock faible</h2>
+            <ul class="stock-list"></ul>
+        </section>
+    </main>
+    <script>
+        async function loadDashboard() {
+            try {
+                const resp = await fetch('/api/dashboard/summary');
+                if (!resp.ok) throw new Error('Erreur API');
+                const data = await resp.json();
+                renderKpis(data);
+                renderTopProducts(data.topProducts);
+                renderLowStock(data.lowStockAlerts);
+            } catch (e) {
+                console.error(e);
+                document.getElementById('kpi-grid').innerHTML = '<p class="error">Impossible de charger le tableau de bord.</p>';
+            }
+        }
+
+        function renderKpis(d) {
+            const grid = document.getElementById('kpi-grid');
+            const items = [
+                { label: 'Produits actifs', value: d.totalProducts },
+                { label: 'Stock faible', value: d.lowStockCount },
+                { label: 'En rupture', value: d.outOfStockCount },
+                { label: "Ventes aujourd'hui (€)", value: d.salesTodayAmount.toFixed(2) },
+                { label: "Nb ventes aujourd'hui", value: d.salesTodayCount },
+                { label: "Ventes ce mois (€)", value: d.salesMonthAmount.toFixed(2) },
+                { label: "Nb ventes ce mois", value: d.salesMonthCount },
+                { label: "Entrées stock aujourd'hui", value: d.entriesToday },
+                { label: "Sorties stock aujourd'hui", value: d.exitsToday }
+            ];
+            grid.innerHTML = items.map(i => `
+                <div class="kpi-card">
+                    <span class="kpi-label">${i.label}</span>
+                    <span class="kpi-value">${i.value}</span>
+                </div>`).join('');
+        }
+
+        function renderTopProducts(list) {
+            const ul = document.querySelector('#top-products .product-list');
+            ul.innerHTML = list.map(p => `
+                <li class="product-item">
+                    <span class="product-name">${p.name}</span>
+                    <span class="product-qty">${p.soldQuantity} x</span>
+                    <span class="product-rev">${p.totalRevenue.toFixed(2)} €</span>
+                </li>`).join('');
+        }
+
+        function renderLowStock(list) {
+            const ul = document.querySelector('#low-stock .stock-list');
+            ul.innerHTML = list.map(a => `
+                <li class="stock-item">
+                    <span class="stock-name">${a.name}</span>
+                    <span class="stock-qty">${a.currentStock}/${a.minStockThreshold}</span>
+                </li>`).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>

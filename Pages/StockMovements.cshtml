@@ -1,0 +1,226 @@
+@page
+@{
+    ViewData["Title"] = "Mouvements de Stock";
+    Layout = "_DashboardLayout";
+}
+
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h1>Mouvements de Stock</h1>
+        <p>Suivez les entrées, sorties et ajustements d'inventaire.</p>
+    </div>
+    <button class="btn-primary" onclick="loadMovements()">
+        <i class="fa-solid fa-rotate-right"></i>
+        <span>Actualiser</span>
+    </button>
+</div>
+
+<div class="glass-card">
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 class="card-title">Historique des Mouvements</h3>
+        <button class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="openMovementModal()">
+            <i class="fa-solid fa-arrow-right-arrow-left"></i> Nouveau Mouvement
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table" id="movementsTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Produit</th>
+                    <th>Quantité</th>
+                    <th>Stock Final</th>
+                    <th>Raison / Référence</th>
+                    <th>Utilisateur</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="8" class="text-center" style="color: var(--text-muted); padding: 2rem;">Chargement...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Stock Movement -->
+<div class="modal-overlay" id="movementModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="movementModalTitle">Nouveau Mouvement</h3>
+            <button class="modal-close" onclick="closeMovementModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="movementForm" onsubmit="saveMovement(event)">
+            <div class="form-group">
+                <label>Produit</label>
+                <select id="m_product" required>
+                    <option value="1">Macadamia 500g</option>
+                    <option value="2">Boisson Énergétique</option>
+                    <option value="3">Savon Liquide</option>
+                </select>
+            </div>
+            <div class="form-group" style="display: flex; gap: 1rem;">
+                <div style="flex: 1;">
+                    <label>Type de Mouvement</label>
+                    <select id="m_type" required>
+                        <option value="In">Entrée (+)</option>
+                        <option value="Out">Sortie (-)</option>
+                        <option value="Adjustment">Ajustement (=)</option>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label>Quantité</label>
+                    <input type="number" id="m_quantity" required min="1" value="1">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Raison / Référence</label>
+                <input type="text" id="m_reason" placeholder="Ex: Réapprovisionnement FR-442">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeMovementModal()">Annuler</button>
+                <button type="submit" class="btn-primary">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function openMovementModal() {
+            document.getElementById('movementForm').reset();
+            const select = document.getElementById('m_product');
+            select.innerHTML = '<option disabled>Chargement...</option>';
+            document.getElementById('movementModal').classList.add('show');
+            
+            try {
+                const token = localStorage.getItem("jwtToken");
+                const resp = await fetch('/api/products?pageNumber=1&pageSize=100', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if(resp.ok) {
+                    const result = await resp.json();
+                    const products = result.items || result;
+                    select.innerHTML = products.map(p => 
+                        `<option value="${p.id}">[${p.sku || 'N/A'}] ${p.name} (Stock: ${p.currentStock} | ${p.isActive ? 'Actif' : 'Inactif'})</option>`
+                    ).join('');
+                }
+            } catch(e) {
+                console.error("Impossible de charger les produits");
+            }
+        }
+
+        function closeMovementModal() {
+            document.getElementById('movementModal').classList.remove('show');
+        }
+
+        async function saveMovement(e) {
+            e.preventDefault();
+            const token = localStorage.getItem("jwtToken");
+            if (!token) return;
+
+            const productId = parseInt(document.getElementById('m_product').value);
+            const type = document.getElementById('m_type').value;
+            const quantity = parseInt(document.getElementById('m_quantity').value);
+            const reason = document.getElementById('m_reason').value;
+
+            const requestBody = {
+                productId: productId,
+                type: type === 'In' ? 0 : (type === 'Out' ? 1 : 2), // Assuming enum: 0=In, 1=Out, 2=Adjustment
+                quantity: quantity,
+                reason: reason,
+                reference: ""
+            };
+
+            try {
+                const resp = await fetch('/api/stockMovements', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!resp.ok) throw new Error(await resp.text());
+                
+                closeMovementModal();
+                showToast('Mouvement de stock enregistré', 'success');
+                loadMovements();
+            } catch (error) {
+                console.error(error);
+                showToast("Erreur: " + error.message, "danger");
+            }
+        }
+
+        function viewMovementDetails() {
+            showToast('Détails du mouvement', 'success');
+        }
+
+        async function loadMovements() {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/Login";
+                return;
+            }
+            
+            const tbody = document.querySelector('#movementsTable tbody');
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color: var(--text-muted); padding: 2rem;">Chargement...</td></tr>';
+            
+            try {
+                const resp = await fetch('/api/stockMovements?pageNumber=1&pageSize=50', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (resp.status === 401) {
+                    window.location.href = "/Login";
+                    return;
+                }
+                if (!resp.ok) throw new Error('Erreur API');
+                
+                const result = await resp.json();
+                const movements = result.items || result;
+                
+                if (!movements || movements.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color: var(--text-muted); padding: 2rem;">Aucun mouvement trouvé.</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = movements.map(m => `
+                    <tr>
+                        <td>${new Date(m.movedAt).toLocaleString()}</td>
+                        <td>
+                            <span class="badge" style="background: ${m.type === 'In' ? 'rgba(34, 197, 94, 0.2)' : (m.type === 'Out' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)')}; color: ${m.type === 'In' ? 'var(--success)' : (m.type === 'Out' ? 'var(--danger)' : 'var(--secondary)')};">
+                                ${m.type === 'In' ? 'Entrée' : (m.type === 'Out' ? 'Sortie' : 'Ajustement')}
+                            </span>
+                        </td>
+                        <td style="font-weight: 500;">${m.productName || 'Produit #'+m.productId}</td>
+                        <td style="font-weight: 600; color: ${m.type === 'In' ? 'var(--success)' : (m.type === 'Out' ? 'var(--danger)' : 'var(--text-primary)')};">
+                            ${m.type === 'In' ? '+' : (m.type === 'Out' ? '-' : '')}${m.quantity}
+                        </td>
+                        <td style="font-weight: 500; color: var(--text-primary);">
+                            ${m.stockAfterMovement}
+                        </td>
+                        <td>
+                            <div style="font-size: 0.9rem;">${m.reason || '-'}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">${m.reference || ''}</div>
+                        </td>
+                        <td><i class="fa-solid fa-user-circle" style="color: var(--text-muted); margin-right: 5px;"></i> ${m.userName || 'Utilisateur #'+m.userId}</td>
+                        <td>
+                            <button class="btn-icon" title="Détails" style="color: var(--primary);" onclick="viewMovementDetails()"><i class="fa-solid fa-circle-info"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+                
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color: var(--danger); padding: 2rem;">Erreur lors du chargement des données.</td></tr>';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', loadMovements);
+    </script>
+}

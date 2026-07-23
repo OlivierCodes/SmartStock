@@ -1,0 +1,283 @@
+@page
+@{
+    ViewData["Title"] = "Produits";
+    Layout = "_DashboardLayout";
+}
+
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h1>Gestion des Produits</h1>
+        <p>Consultez, ajoutez et modifiez les produits du catalogue.</p>
+    </div>
+    <button class="btn-primary" onclick="loadProducts()">
+        <i class="fa-solid fa-rotate-right"></i>
+        <span>Actualiser</span>
+    </button>
+</div>
+
+<div class="glass-card">
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 class="card-title">Liste des Produits</h3>
+        <button class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="openProductModal()">
+            <i class="fa-solid fa-plus"></i> Nouveau
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table" id="productsTable">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Nom</th>
+                    <th>Catégorie</th>
+                    <th>Prix Vente</th>
+                    <th>Stock</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="7" class="text-center" style="color: var(--text-muted); padding: 2rem;">Chargement...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Product -->
+<div class="modal-overlay" id="productModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="productModalTitle">Nouveau Produit</h3>
+            <button class="modal-close" onclick="closeProductModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="productForm" onsubmit="saveProduct(event)">
+            <input type="hidden" id="p_id">
+            <div class="form-group">
+                <label>Nom du produit</label>
+                <input type="text" id="p_name" required placeholder="Ex: Macadamia 500g">
+            </div>
+            <div class="form-group" style="display: flex; gap: 1rem;">
+                <div style="flex: 1;">
+                    <label>SKU</label>
+                    <input type="text" id="p_sku" placeholder="Ex: PRD-001">
+                </div>
+                <div style="flex: 1;">
+                    <label>Catégorie</label>
+                    <select id="p_category">
+                        <option value="1">Alimentation</option>
+                        <option value="2">Boissons</option>
+                        <option value="3">Hygiène</option>
+                        <option value="4">Électronique</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" style="display: flex; gap: 1rem;">
+                <div style="flex: 1;">
+                    <label>Prix (Vente)</label>
+                    <input type="number" step="0.01" id="p_price" required>
+                </div>
+                <div style="flex: 1;">
+                    <label>Stock initial</label>
+                    <input type="number" id="p_stock" value="0" required>
+                </div>
+                <div style="flex: 1;">
+                    <label>Seuil d'alerte</label>
+                    <input type="number" id="p_minstock" value="5" required>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeProductModal()">Annuler</button>
+                <button type="submit" class="btn-primary">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openProductModal(id = null, name = '', sku = '', categoryId = 1, price = 0, minStock = 5, currentStock = 0) {
+            document.getElementById('productForm').reset();
+            const isEdit = id !== null;
+            document.getElementById('productModalTitle').innerText = isEdit ? 'Modifier le Produit' : 'Nouveau Produit';
+            
+            if (isEdit) {
+                document.getElementById('p_id').value = id;
+                document.getElementById('p_name').value = name;
+                document.getElementById('p_sku').value = sku;
+                document.getElementById('p_category').value = categoryId || 1;
+                document.getElementById('p_price').value = price;
+                document.getElementById('p_minstock').value = minStock;
+                document.getElementById('p_stock').value = currentStock;
+                document.getElementById('p_stock').disabled = true;
+                document.getElementById('p_stock').title = "Le stock ne peut être modifié que via les mouvements de stock";
+            } else {
+                document.getElementById('p_id').value = '';
+                document.getElementById('p_stock').value = '0';
+                document.getElementById('p_stock').disabled = false;
+                document.getElementById('p_stock').title = "";
+            }
+            document.getElementById('productModal').classList.add('show');
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').classList.remove('show');
+        }
+
+        async function saveProduct(e) {
+            e.preventDefault();
+            
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/Login";
+                return;
+            }
+
+            const id = document.getElementById('p_id').value;
+            const name = document.getElementById('p_name').value;
+            const sku = document.getElementById('p_sku').value;
+            const categoryId = parseInt(document.getElementById('p_category').value);
+            const sellingPrice = parseFloat(document.getElementById('p_price').value);
+            const minStockThreshold = parseInt(document.getElementById('p_minstock').value);
+            const initialStock = parseInt(document.getElementById('p_stock').value) || 0;
+            
+            const isEdit = id !== '';
+            
+            let requestBody;
+            if (isEdit) {
+                requestBody = {
+                    name: name,
+                    sku: sku,
+                    sellingPrice: sellingPrice,
+                    minStockThreshold: minStockThreshold,
+                    categoryId: categoryId
+                };
+            } else {
+                requestBody = {
+                    name: name,
+                    sku: sku,
+                    description: "",
+                    purchasePrice: 0,
+                    sellingPrice: sellingPrice,
+                    initialStock: initialStock,
+                    minStockThreshold: minStockThreshold,
+                    unit: "unité",
+                    categoryId: categoryId
+                };
+            }
+
+            try {
+                const url = isEdit ? '/api/products/' + id : '/api/products';
+                const method = isEdit ? 'PUT' : 'POST';
+                
+                const resp = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!resp.ok) {
+                    const errText = await resp.text();
+                    let errMsg = errText;
+                    try {
+                        const errJson = JSON.parse(errText);
+                        if (errJson.message) errMsg = errJson.message;
+                    } catch (e) { }
+                    throw new Error(errMsg);
+                }
+
+                closeProductModal();
+                showToast(isEdit ? 'Produit mis à jour' : 'Produit créé avec succès', 'success');
+                loadProducts();
+            } catch (error) {
+                console.error(error);
+                showToast("Erreur: " + error.message, "danger");
+            }
+        }
+
+        function deleteProduct(id) {
+            showConfirmModal("Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.", async () => {
+                const token = localStorage.getItem("jwtToken");
+                try {
+                    const resp = await fetch('/api/products/' + id, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (!resp.ok) throw new Error("Échec de la suppression");
+                    
+                    showToast('Produit supprimé', 'success');
+                    loadProducts();
+                } catch (error) {
+                    showToast("Erreur: " + error.message, "danger");
+                }
+            });
+        }
+
+        async function loadProducts() {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/Login";
+                return;
+            }
+            
+            const tbody = document.querySelector('#productsTable tbody');
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="color: var(--text-muted); padding: 2rem;">Chargement...</td></tr>';
+            
+            try {
+                const resp = await fetch('/api/products?pageNumber=1&pageSize=50', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (resp.status === 401) {
+                    window.location.href = "/Login";
+                    return;
+                }
+                if (!resp.ok) throw new Error('Erreur API');
+                
+                const result = await resp.json();
+                const products = result.items || result;
+                
+                if (!products || products.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="color: var(--text-muted); padding: 2rem;">Aucun produit trouvé.</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = products.map(p => `
+                    <tr>
+                        <td><span class="badge" style="background: rgba(148, 163, 184, 0.2); color: var(--text-muted);">${p.sku || p.sKU || p.SKU || 'N/A'}</span></td>
+                        <td style="font-weight: 500;">${p.name || p.Name}</td>
+                        <td>${p.categoryName || p.CategoryName || '-'}</td>
+                        <td style="font-weight: 600; color: var(--text-primary);">${(p.sellingPrice ?? p.SellingPrice).toFixed(2)} FCFA</td>
+                        <td>
+                            <span class="badge" style="background: ${(p.currentStock ?? p.CurrentStock) <= (p.minStockThreshold ?? p.MinStockThreshold) ? 'rgba(239, 68, 68, 0.2)' : 'rgba(34, 197, 94, 0.2)'}; color: ${(p.currentStock ?? p.CurrentStock) <= (p.minStockThreshold ?? p.MinStockThreshold) ? 'var(--danger)' : 'var(--success)'};">
+                                ${p.currentStock ?? p.CurrentStock} ${p.unit || p.Unit}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge" style="background: ${(p.isActive ?? p.IsActive) ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}; color: ${(p.isActive ?? p.IsActive) ? 'var(--success)' : 'var(--danger)'};">
+                                ${(p.isActive ?? p.IsActive) ? 'Actif' : 'Inactif'}
+                            </span>
+                        </td>
+                        <td style="white-space: nowrap;">
+                            <button class="btn-icon" title="Modifier" style="color: var(--primary);" onclick="openProductModal(${p.id ?? p.Id}, '${(p.name || p.Name).replace(/'/g, "\\'")}', '${(p.sku || p.sKU || p.SKU || '').replace(/'/g, "\\'")}', ${p.categoryId ?? p.CategoryId}, ${p.sellingPrice ?? p.SellingPrice}, ${p.minStockThreshold ?? p.MinStockThreshold}, ${p.currentStock ?? p.CurrentStock})"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button class="btn-icon" title="Supprimer" style="color: var(--danger); margin-left: 0.5rem;" onclick="deleteProduct(${p.id ?? p.Id})"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+                
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="color: var(--danger); padding: 2rem;">Erreur lors du chargement des données.</td></tr>';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', loadProducts);
+    </script>
+}

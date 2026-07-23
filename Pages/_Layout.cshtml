@@ -1,0 +1,38 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SmartStock – @ViewData["Title"]</title>
+    <link rel="stylesheet" href="/css/dashboard.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+    <nav class="sidenav">
+        <div class="sidenav-header">
+            <h2>SmartStock</h2>
+        </div>
+        <ul class="sidenav-menu">
+            <li><a asp-page="/Dashboard" id="nav-dashboard">Dashboard</a></li>
+            <li><a asp-page="/Products" id="nav-products">Produits</a></li>
+            <li><a asp-page="/Sales" id="nav-sales">Ventes</a></li>
+            <li><a asp-page="/Stock" id="nav-stock">Mouvements</a></li>
+            <li><a asp-page="/Logout" id="nav-logout">Déconnexion</a></li>
+        </ul>
+    </nav>
+    <main class="dashboard" id="main-content">
+        @RenderBody()
+    </main>
+    <div id="toast" class="toast" style="display:none;"></div>
+    <div id="modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-button" id="modal-close">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+    <script src="/script.js"></script>
+</body>
+</html>

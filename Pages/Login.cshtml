@@ -1,0 +1,73 @@
+@page
+@{
+    Layout = null;
+    ViewData["Title"] = "Connexion";
+}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SmartStock – @ViewData["Title"]</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/login.css" />
+</head>
+<body>
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+    
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h2>SmartStock</h2>
+                <p>Bienvenue. Connectez-vous pour continuer.</p>
+            </div>
+            
+            <form onsubmit="login(event)" class="login-form">
+                <div class="input-group">
+                    <label for="login-email">Adresse Email</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="login-email" placeholder="nom@entreprise.com" value="admin@smartstock.com" required autocomplete="email" />
+                        <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="login-password">Mot de passe</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="login-password" placeholder="••••••••" value="Admin@1234" required autocomplete="current-password" />
+                        <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <label class="remember-me">
+                        <input type="checkbox" id="remember" />
+                        <span>Se souvenir de moi</span>
+                    </label>
+                    <a href="#" class="forgot-password">Mot de passe oublié ?</a>
+                </div>
+
+                <div class="demo-credentials" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 12px; text-align: center; font-size: 0.85rem; color: var(--text-primary); margin-top: 0.5rem; backdrop-filter: blur(4px);">
+                    <p style="margin-bottom: 6px; font-weight: 600; color: var(--accent); font-size: 0.9rem;">Accès Administrateur</p>
+                    <div style="display: flex; justify-content: center; gap: 1rem; color: var(--text-secondary);">
+                        <span><strong>Email:</strong> admin@smartstock.com</span>
+                        <span><strong>Pass:</strong> Admin@1234</span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-primary">
+                    <span>Se connecter</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast" style="display:none;"></div>
+    <script src="/script.js"></script>
+</body>
+</html>

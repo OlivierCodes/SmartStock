@@ -1,0 +1,181 @@
+@page
+@{
+    ViewData["Title"] = "Tableau de bord";
+    Layout = "_DashboardLayout";
+}
+
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h1 id="dashboardWelcome">Vue d'ensemble</h1>
+        <p>Gérez vos stocks et suivez vos performances commerciales.</p>
+    </div>
+    <button class="btn-primary" onclick="loadDashboard()">
+        <i class="fa-solid fa-rotate-right"></i>
+        <span>Actualiser</span>
+    </button>
+</div>
+
+<!-- KPI Row -->
+<div class="kpi-row">
+
+    <div class="glass-card kpi-card">
+        <div class="kpi-icon orders">
+            <i class="fa-solid fa-cart-shopping"></i>
+        </div>
+        <div class="kpi-details">
+            <span class="kpi-label">Ventes du jour</span>
+            <span class="kpi-value" id="kpi-sales">0</span>
+        </div>
+    </div>
+    <div class="glass-card kpi-card">
+        <div class="kpi-icon products">
+            <i class="fa-solid fa-box-open"></i>
+        </div>
+        <div class="kpi-details">
+            <span class="kpi-label">Produits actifs</span>
+            <span class="kpi-value" id="kpi-products">0</span>
+        </div>
+    </div>
+    <div class="glass-card kpi-card">
+        <div class="kpi-icon alerts">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div class="kpi-details">
+            <span class="kpi-label">Stock critique</span>
+            <span class="kpi-value" id="kpi-alerts">0</span>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="dashboard-grid">
+    <!-- Low Stock Alerts (Replaced Chart) -->
+    <div class="glass-card">
+        <div class="card-header">
+            <h3 class="card-title" style="color: var(--danger);">Alertes Stock Faible</h3>
+        </div>
+        <div class="item-list" id="low-stock-list">
+             <!-- Injected via JS -->
+             <div class="text-center" style="color: var(--text-muted);">Chargement...</div>
+        </div>
+    </div>
+
+    <!-- Top Products Section -->
+    <div class="glass-card">
+        <div class="card-header">
+            <h3 class="card-title">Top Produits</h3>
+        </div>
+        <div class="item-list" id="top-products-list">
+            <!-- Injected via JS -->
+            <div class="text-center" style="color: var(--text-muted);">Chargement...</div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        async function loadDashboard() {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                window.location.href = "/Login";
+                return;
+            }
+            try {
+                // Pour l'esthétique, on ajoute un petit délai ou effet de loading si nécessaire
+                const resp = await fetch('/api/dashboard/summary', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (resp.status === 401) {
+                    localStorage.removeItem("jwtToken");
+                    window.location.href = "/Login";
+                    return;
+                }
+                if (!resp.ok) throw new Error('Erreur API');
+                const data = await resp.json();
+                
+                // Update KPIs
+                document.getElementById('kpi-sales').innerText = (data.salesTodayAmount || 0).toFixed(2) + ' FCFA';
+                document.getElementById('kpi-products').innerText = data.totalProducts;
+                document.getElementById('kpi-alerts').innerText = data.lowStockCount;
+
+                // Update Top Products
+                renderTopProducts(data.topProducts);
+                
+                // Update Low Stock
+                renderLowStock(data.lowStockAlerts);
+
+            } catch (e) {
+                console.error(e);
+                alert("Impossible de charger les données du tableau de bord.");
+            }
+        }
+
+        function renderTopProducts(list) {
+            const container = document.getElementById('top-products-list');
+            if (!list || list.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">Aucun produit vendu récemment.</p>';
+                return;
+            }
+            container.innerHTML = list.slice(0, 5).map(p => `
+                <div class="list-item">
+                    <div class="item-info">
+                        <div class="item-img"><i class="fa-solid fa-box"></i></div>
+                        <div class="item-details">
+                            <h4>[${p.sku || 'N/A'}] ${p.name}</h4>
+                            <p>${p.soldQuantity} unités vendues</p>
+                            <p style="margin-top: 0.2rem;">
+                                <span class="badge" style="background: rgba(148,163,184,0.2); color: var(--text-muted); font-size: 0.7rem; padding: 0.15rem 0.4rem;">Stock: ${p.currentStock}</span>
+                                <span class="badge" style="background: ${p.isActive ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}; color: ${p.isActive ? 'var(--success)' : 'var(--danger)'}; font-size: 0.7rem; padding: 0.15rem 0.4rem;">${p.isActive ? 'Actif' : 'Inactif'}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="item-stats">
+                        <span class="price">${p.totalRevenue.toFixed(2)} FCFA</span>
+                        <span class="sales"><i class="fa-solid fa-arrow-trend-up"></i> Top</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderLowStock(list) {
+            const container = document.getElementById('low-stock-list');
+            if (!list || list.length === 0) {
+                container.innerHTML = '<p style="color: var(--secondary);"><i class="fa-solid fa-check-circle"></i> Aucun stock critique.</p>';
+                return;
+            }
+            container.innerHTML = list.map(p => `
+                <div class="list-item">
+                    <div class="item-info">
+                        <div class="item-img" style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="item-details">
+                            <h4>[${p.sku || 'N/A'}] ${p.name}</h4>
+                            <p>Seuil minimal: ${p.minStockThreshold}</p>
+                            <p style="margin-top: 0.2rem;">
+                                <span class="badge" style="background: ${p.isActive ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}; color: ${p.isActive ? 'var(--success)' : 'var(--danger)'}; font-size: 0.7rem; padding: 0.15rem 0.4rem;">${p.isActive ? 'Actif' : 'Inactif'}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="item-stats">
+                        <span class="price" style="color: var(--danger);">${p.currentStock} restants</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboard();
+            
+            const token = localStorage.getItem("jwtToken");
+            if (token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+                    const firstName = payload["firstName"] || "Utilisateur";
+                    document.getElementById('dashboardWelcome').innerText = `Bienvenue, ${firstName} !`;
+                } catch(e) {}
+            }
+        });
+    </script>
+}

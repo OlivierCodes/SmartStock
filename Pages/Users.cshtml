@@ -1,0 +1,293 @@
+@page
+@{
+    ViewData["Title"] = "Utilisateurs";
+    Layout = "_DashboardLayout";
+}
+
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h1>Gestion des Utilisateurs</h1>
+        <p>Administrez les accès et les rôles des employés.</p>
+    </div>
+    <button class="btn-primary" onclick="openUserModal()">
+        <i class="fa-solid fa-user-plus"></i>
+        <span>Nouvel Utilisateur</span>
+    </button>
+</div>
+
+<div class="glass-card">
+    <div class="card-header">
+        <h3 class="card-title">Liste des Utilisateurs</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table" id="usersTable">
+            <thead>
+                <tr>
+                    <th>Utilisateur</th>
+                    <th>Email</th>
+                    <th>Rôle</th>
+                    <th>Statut</th>
+                    <th>Dernière connexion</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Contenu généré via JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal User -->
+<div id="userModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="userModalTitle">Nouvel Utilisateur</h3>
+            <button class="modal-close" onclick="closeUserModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="userForm" onsubmit="saveUser(event)">
+            <input type="hidden" id="u_id" />
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Prénom <span style="color:var(--danger)">*</span></label>
+                    <input type="text" id="u_firstname" required />
+                </div>
+                <div class="form-group">
+                    <label>Nom <span style="color:var(--danger)">*</span></label>
+                    <input type="text" id="u_lastname" required />
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Email <span style="color:var(--danger)">*</span></label>
+                <input type="email" id="u_email" required />
+            </div>
+            
+            <div class="form-group" id="pwdGroup">
+                <label>Mot de passe <span style="color:var(--danger)">*</span></label>
+                <input type="password" id="u_password" required minlength="6" />
+                <small style="color: var(--text-muted);">Au moins 6 caractères.</small>
+            </div>
+            
+            <div class="form-group" id="roleGroup">
+                <label>Rôle <span style="color:var(--danger)">*</span></label>
+                <select id="u_role" required>
+                    <option value="Vendeur">Vendeur</option>
+                    <option value="Magasinier">Magasinier</option>
+                    <option value="Responsable">Responsable</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="activeGroup" style="display: none; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+                <input type="checkbox" id="u_isactive" style="width: auto;" />
+                <label for="u_isactive" style="margin: 0;">Compte Actif</label>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeUserModal()">Annuler</button>
+                <button type="submit" class="btn-primary">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let allUsers = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUsers();
+        });
+
+        async function loadUsers() {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) return;
+
+            const tbody = document.querySelector('#usersTable tbody');
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem;">Chargement...</td></tr>';
+
+            try {
+                const resp = await fetch('/api/users', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!resp.ok) {
+                    throw new Error("Erreur de chargement. Veuillez vérifier vos droits d'accès.");
+                }
+                
+                allUsers = await resp.json();
+                renderUsers();
+            } catch(e) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger" style="padding:2rem;">${e.message}</td></tr>`;
+            }
+        }
+
+        function renderUsers() {
+            const tbody = document.querySelector('#usersTable tbody');
+            if (allUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding:2rem;">Aucun utilisateur trouvé.</td></tr>';
+                return;
+            }
+
+            let html = '';
+            allUsers.forEach(u => {
+                let badgeColor = 'var(--primary)';
+                if (u.role === 'Responsable') badgeColor = 'var(--danger)';
+                else if (u.role === 'Magasinier') badgeColor = 'var(--warning)';
+
+                html += `
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(u.firstName + ' ' + u.lastName)}&background=random&color=fff" style="width: 36px; height: 36px; border-radius: 50%;">
+                                <span style="font-weight: 500; color: var(--text-primary);">${u.firstName} ${u.lastName}</span>
+                            </div>
+                        </td>
+                        <td style="color: var(--text-secondary);">${u.email}</td>
+                        <td>
+                            <span style="padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; background: ${badgeColor}20; color: ${badgeColor}; border: 1px solid ${badgeColor}40;">
+                                ${u.role}
+                            </span>
+                        </td>
+                        <td>
+                            ${u.isActive 
+                                ? '<span style="color: var(--success); font-weight: 500;"><i class="fa-solid fa-check-circle"></i> Actif</span>' 
+                                : '<span style="color: var(--danger); font-weight: 500;"><i class="fa-solid fa-ban"></i> Inactif</span>'}
+                        </td>
+                        <td style="color: var(--text-secondary); font-size: 0.9rem;">
+                            ${u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString() : 'Jamais'}
+                        </td>
+                        <td style="text-align: right;">
+                            <button class="btn-icon" onclick="editUser(${u.id})" title="Modifier">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button class="btn-icon text-danger" onclick="deleteUser(${u.id})" title="Désactiver">
+                                <i class="fa-solid fa-ban"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function openUserModal() {
+            document.getElementById('userForm').reset();
+            document.getElementById('u_id').value = '';
+            document.getElementById('userModalTitle').innerText = 'Nouvel Utilisateur';
+            document.getElementById('pwdGroup').style.display = 'block';
+            document.getElementById('roleGroup').style.display = 'block';
+            document.getElementById('u_password').required = true;
+            document.getElementById('activeGroup').style.display = 'none';
+            document.getElementById('userModal').classList.add('show');
+        }
+
+        function editUser(id) {
+            const user = allUsers.find(u => u.id === id);
+            if (!user) return;
+
+            document.getElementById('userForm').reset();
+            document.getElementById('u_id').value = user.id;
+            document.getElementById('userModalTitle').innerText = 'Modifier Utilisateur';
+            
+            document.getElementById('u_firstname').value = user.firstName;
+            document.getElementById('u_lastname').value = user.lastName;
+            document.getElementById('u_email').value = user.email;
+            
+            // Password and Role cannot be updated via this endpoint
+            document.getElementById('pwdGroup').style.display = 'none';
+            document.getElementById('u_password').required = false;
+            document.getElementById('roleGroup').style.display = 'none';
+            
+            document.getElementById('activeGroup').style.display = 'flex';
+            document.getElementById('u_isactive').checked = user.isActive;
+
+            document.getElementById('userModal').classList.add('show');
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').classList.remove('show');
+        }
+
+        async function saveUser(e) {
+            e.preventDefault();
+            const id = document.getElementById('u_id').value;
+            const token = localStorage.getItem("jwtToken");
+
+            const isUpdate = id !== '';
+            let url = isUpdate ? `/api/users/${id}` : '/api/Auth/register';
+            let method = isUpdate ? 'PUT' : 'POST';
+
+            let payload = {};
+            if (isUpdate) {
+                payload = {
+                    firstName: document.getElementById('u_firstname').value,
+                    lastName: document.getElementById('u_lastname').value,
+                    email: document.getElementById('u_email').value,
+                    isActive: document.getElementById('u_isactive').checked
+                };
+            } else {
+                payload = {
+                    firstName: document.getElementById('u_firstname').value,
+                    lastName: document.getElementById('u_lastname').value,
+                    email: document.getElementById('u_email').value,
+                    password: document.getElementById('u_password').value,
+                    role: document.getElementById('u_role').value
+                };
+            }
+
+            try {
+                const resp = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!resp.ok) {
+                    const errText = await resp.text();
+                    let errMsg = errText;
+                    try {
+                        const errJson = JSON.parse(errText);
+                        if (errJson.message) errMsg = errJson.message;
+                    } catch (ex) { }
+                    throw new Error(errMsg);
+                }
+
+                showToast(`Utilisateur ${isUpdate ? 'modifié' : 'créé'} avec succès`, 'success');
+                closeUserModal();
+                loadUsers();
+            } catch(error) {
+                showToast("Erreur: " + error.message, "danger");
+            }
+        }
+
+        function deleteUser(id) {
+            showConfirmModal("Êtes-vous sûr de vouloir désactiver cet utilisateur ?", async () => {
+                const token = localStorage.getItem("jwtToken");
+                try {
+                    const resp = await fetch(`/api/users/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!resp.ok) {
+                        const errText = await resp.text();
+                        let errMsg = errText;
+                        try {
+                            const errJson = JSON.parse(errText);
+                            if (errJson.message) errMsg = errJson.message;
+                        } catch (ex) { }
+                        throw new Error(errMsg);
+                    }
+                    showToast('Utilisateur désactivé avec succès', 'success');
+                    loadUsers();
+                } catch(e) {
+                    showToast("Erreur: " + e.message, "danger");
+                }
+            });
+        }
+    </script>
+}

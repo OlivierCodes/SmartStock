@@ -1,0 +1,206 @@
+@page
+@model SmartStock.Pages.IndexModel
+@{
+    ViewData["Title"] = "Gestion des Stocks & Ventes";
+}
+
+<div class="hero">
+    <div class="badge">Version 1.0.0 — ASP.NET Core 9.0</div>
+    <h1>Système Intelligent de Gestion<br>des Stocks et des Ventes</h1>
+    <p>
+        Une solution numérique moderne, simple et fiable pour remplacer les cahiers de gestion traditionnels des commerces et boutiques du Grand Marché de Lomé.
+    </p>
+    <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+        <a class="btn-swagger" href="/swagger">Accéder à Swagger API</a>
+        <a class="nav-link" href="#roles" style="display: flex; align-items: center; border: 1px solid var(--border); padding: 0.6rem 1.5rem; border-radius: 50px;">
+            Découvrir le fonctionnement
+        </a>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Live Dashboard / Mock Statistics preview -->
+    <div class="dashboard-preview">
+        <div class="dashboard-header">
+            <div class="dashboard-title">
+                <h2>Tableau de Bord Centralisé</h2>
+                <p>État du système en temps réel</p>
+            </div>
+            @if (Model.IsDatabaseConnected)
+            {
+                <span style="color: var(--secondary); font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--secondary); display: inline-block;"></span>
+                    Base de données connectée (Réel)
+                </span>
+            }
+            else
+            {
+                <span style="color: #f59e0b; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #f59e0b; display: inline-block;"></span>
+                    Mode Démo (Données simulées)
+                </span>
+            }
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box primary">
+                <div class="label">Produits Actifs</div>
+                <div class="value">@Model.TotalProducts</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Catégories</div>
+                <div class="value">@Model.TotalCategories</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Utilisateurs actifs</div>
+                <div class="value">@Model.TotalUsers</div>
+            </div>
+            <div class="stat-box" style="border-color: rgba(239, 68, 68, 0.2);">
+                <div class="label" style="color: #f87171;">Stocks faibles / Ruptures</div>
+                <div class="value" style="color: #ef4444;">@Model.LowStockAlertsCount</div>
+            </div>
+        </div>
+
+        <!-- Quick Demo Console to interact -->
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--border);">
+            <h4 style="margin-bottom: 0.5rem; font-size: 0.95rem; color: #fff;">Test Rapide de Simulation (Front-End)</h4>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+                Simulez une mise à jour de stock ou une vente interactive pour voir la réactivité.
+            </p>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button onclick="simulateStockEntry()" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: var(--secondary); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: var(--transition);">
+                    + Simuler Entrée Stock (+10)
+                </button>
+                <button onclick="simulateSale()" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: var(--transition);">
+                    - Simuler Vente (-1)
+                </button>
+                <div id="sim-log" style="flex-grow: 1; text-align: right; color: var(--text-muted); font-family: monospace; font-size: 0.85rem; align-self: center;">
+                    En attente d'action...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Description -->
+    <h2 id="roles" style="text-align: center; margin-bottom: 2rem; font-size: 2rem;">Rôles &amp; Fonctionnalités du Système</h2>
+    
+    <div class="grid-3">
+        <div class="card">
+            <div class="card-icon">📦</div>
+            <h3>Rôle Magasinier</h3>
+            <p>
+                Gère les mouvements de stock. Il peut consulter le catalogue des produits disponibles, enregistrer les entrées de marchandises (réapprovisionnements), et documenter les sorties de stock avec historique complet.
+            </p>
+        </div>
+        <div class="card">
+            <div class="card-icon">📱</div>
+            <h3>Rôle Vendeur</h3>
+            <p>
+                Utilise son téléphone pour saisir les ventes. En sélectionnant un produit et sa quantité lors d'un achat, le stock disponible est mis à jour et synchronisé instantanément avec le magasin central.
+            </p>
+        </div>
+        <div class="card">
+            <div class="card-icon">📊</div>
+            <h3>Responsable / Propriétaire</h3>
+            <p>
+                Dispose d'un tableau de bord de supervision : activité en temps réel, statistiques des ventes, produits les plus vendus, détection des ruptures de stock, et rapports journaliers, hebdomadaires ou mensuels.
+            </p>
+        </div>
+    </div>
+
+    <!-- Tech details -->
+    <div class="tech-section">
+        <div class="tech-info">
+            <h2>Architecture Technique de SmartStock</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                Construit sur les meilleures technologies .NET modernes pour assurer la flexibilité, la scalabilité et la performance.
+            </p>
+            <div class="tech-list">
+                <div class="tech-item">
+                    <div class="tech-item-dot"></div>
+                    <div class="tech-item-text">
+                        <h4>Entity Framework Core 9.0</h4>
+                        <p>Support double base de données (SQL Server &amp; PostgreSQL) avec migrations prêtes.</p>
+                    </div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-item-dot"></div>
+                    <div class="tech-item-text">
+                        <h4>Authentification JWT</h4>
+                        <p>Sécurisation robuste par rôles pour le Magasinier, Vendeur et Responsable.</p>
+                    </div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-item-dot"></div>
+                    <div class="tech-item-text">
+                        <h4>Swashbuckle Swagger UI</h4>
+                        <p>Documentation complète des endpoints de l'API avec support du jeton Bearer.</p>
+                    </div>
+                </div>
+                <div class="tech-item">
+                    <div class="tech-item-dot"></div>
+                    <div class="tech-item-text">
+                        <h4>Razor Pages &amp; API</h4>
+                        <p>Combinaison parfaite de pages d'accueil et d'API REST contrôlées.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="flex: 1 1 400px; display: flex; flex-direction: column; justify-content: center; background: rgba(99, 102, 241, 0.05); border-color: rgba(99, 102, 241, 0.15);">
+            <h3 style="margin-bottom: 1rem; color: #fff;">Compte administrateur initial</h3>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                Le système génère automatiquement un compte de test responsable par défaut. Vous pouvez l'utiliser pour vous authentifier sur le Swagger API.
+            </p>
+            <div style="background: rgba(15, 23, 42, 0.6); padding: 1rem; border-radius: 12px; font-family: monospace; font-size: 0.9rem; border: 1px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="color: var(--text-muted);">Email:</span>
+                    <span style="color: #fff; font-weight: 600;">admin@smartstock.com</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Mot de passe:</span>
+                    <span style="color: #fff; font-weight: 600;">Admin@@1234</span>
+                </div>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 1rem; font-style: italic;">
+                Remarque : Dans le code, le mot de passe est hashé à l'aide de BCrypt.
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentStock = @Model.TotalProducts * 10; // Valeur de simulation initiale
+        
+        function simulateStockEntry() {
+            currentStock += 10;
+            const log = document.getElementById("sim-log");
+            log.innerText = `+10 produits ajoutés. Stock virtuel: ${currentStock}`;
+            log.style.color = "var(--secondary)";
+            triggerPulse(log);
+        }
+
+        function simulateSale() {
+            if (currentStock <= 0) {
+                const log = document.getElementById("sim-log");
+                log.innerText = "Stock virtuel épuisé !";
+                log.style.color = "#ef4444";
+                return;
+            }
+            currentStock -= 1;
+            const log = document.getElementById("sim-log");
+            log.innerText = `-1 produit vendu. Stock virtuel: ${currentStock}`;
+            log.style.color = "#f87171";
+            triggerPulse(log);
+        }
+
+        function triggerPulse(el) {
+            el.style.transform = "scale(1.05)";
+            el.style.transition = "transform 0.1s ease";
+            setTimeout(() => {
+                el.style.transform = "scale(1)";
+            }, 100);
+        }
+    </script>
+}
