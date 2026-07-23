@@ -157,6 +157,9 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 // ══════════════════════════════════════════════════════════════════════════════
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 // ── Migrations automatiques ────────────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {

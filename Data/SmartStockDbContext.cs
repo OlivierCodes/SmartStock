@@ -39,7 +39,7 @@ public class SmartStockDbContext : DbContext
         // ── Product ───────────────────────────────────────────
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasIndex(p => p.SKU).IsUnique().HasFilter("[SKU] IS NOT NULL");
+            entity.HasIndex(p => p.SKU).IsUnique().HasFilter("\"SKU\" IS NOT NULL");
 
             entity.HasOne(p => p.Category)
                   .WithMany(c => c.Products)
