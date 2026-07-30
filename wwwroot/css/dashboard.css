@@ -17,19 +17,75 @@ html {
 body {
   min-height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: flex-start;
   padding: 2rem;
+  gap: 2rem;
+  justify-content: center;
+}
+
+/* --- Sidenav Styles --- */
+.sidenav {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 1rem;
+  padding: 2rem;
+  width: 250px;
+  flex-shrink: 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidenav-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.sidenav-header h2 {
+  font-size: 1.5rem;
+  color: #f5f5ff;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #ffffff, #a0a0ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sidenav-menu {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.sidenav-menu li a {
+  display: block;
+  padding: 0.8rem 1.2rem;
+  border-radius: 0.6rem;
+  color: #d1d1ff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.sidenav-menu li a:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  transform: translateX(5px);
 }
 
 /* Glassmorphism container */
 .dashboard {
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 1rem;
-  padding: 2rem;
-  width: 100%;
-  max-width: 1200px;
+  padding: 2.5rem;
+  flex-grow: 1;
+  max-width: 1000px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
@@ -44,46 +100,51 @@ body {
 /* KPI grid */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
 }
 
 .kpi-card {
   background: rgba(255, 255, 255, 0.12);
-  border-radius: 0.8rem;
-  padding: 1rem;
+  border-radius: 1rem;
+  padding: 1.5rem;
   text-align: center;
   transition: transform 0.2s ease, background 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .kpi-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
   background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
 .kpi-label {
   display: block;
   font-size: 0.95rem;
   color: #ccccff;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.8rem;
+  font-weight: 500;
 }
 
 .kpi-value {
-  font-size: 1.6rem;
-  font-weight: 600;
+  font-size: 1.8rem;
+  font-weight: 700;
   color: #ffeb3b;
 }
 
 /* Sections */
 section {
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 section h2 {
-  font-size: 1.6rem;
-  margin-bottom: 0.8rem;
+  font-size: 1.5rem;
+  margin-bottom: 1.2rem;
   color: #e0e0ff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
 }
 
 /* List styles */
@@ -91,18 +152,19 @@ section h2 {
 .stock-list {
   list-style: none;
   display: grid;
-  gap: 0.8rem;
+  gap: 1rem;
 }
 
 .product-item,
 .stock-item {
   background: rgba(255, 255, 255, 0.09);
-  border-radius: 0.6rem;
-  padding: 0.8rem 1rem;
+  border-radius: 0.8rem;
+  padding: 1.2rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   transition: background 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .product-item:hover,
@@ -112,24 +174,159 @@ section h2 {
 
 .product-name,
 .stock-name {
-  font-weight: 500;
-  color: #d1d1ff;
+  font-weight: 600;
+  color: #f0f0f5;
+  font-size: 1.05rem;
 }
 
 .product-qty,
 .product-rev,
 .stock-qty {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: #a0a0ff;
+  font-weight: 500;
 }
 
 .error {
   color: #ff6868;
   text-align: center;
   font-weight: 600;
+  padding: 1rem;
+  background: rgba(255, 104, 104, 0.1);
+  border-radius: 0.5rem;
 }
 
+/* --- Responsive Media Queries --- */
+
+/* Tablet (max-width: 1024px) */
+@media (max-width: 1024px) {
+  body {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+  
+  .sidenav {
+    position: static;
+    width: 100%;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .sidenav-header {
+    margin-bottom: 0;
+  }
+  
+  .sidenav-menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.8rem;
+  }
+  
+  .sidenav-menu li a {
+    padding: 0.6rem 1rem;
+  }
+  
+  .sidenav-menu li a:hover {
+    transform: translateY(-2px);
+  }
+  
+  .dashboard {
+    max-width: 100%;
+  }
+}
+
+/* Mobile (max-width: 768px) */
 @media (max-width: 768px) {
-  .dashboard { padding: 1rem; }
-  .header h1 { font-size: 1.8rem; }
+  body {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .sidenav {
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+  
+  .sidenav-header h2 {
+    font-size: 1.8rem;
+  }
+  
+  .sidenav-menu {
+    justify-content: center;
+    width: 100%;
+    gap: 0.5rem;
+  }
+  
+  .sidenav-menu li {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+
+  .sidenav-menu li a {
+    padding: 0.8rem;
+    font-size: 1rem;
+  }
+
+  .dashboard {
+    padding: 1.5rem;
+    border-radius: 1rem;
+  }
+  
+  .header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .kpi-card {
+    padding: 1.2rem 1rem;
+  }
+  
+  .kpi-value {
+    font-size: 1.5rem;
+  }
+  
+  section h2 {
+    font-size: 1.3rem;
+  }
+  
+  .product-item,
+  .stock-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+    padding: 1rem;
+  }
+  
+  .product-qty,
+  .product-rev,
+  .stock-qty {
+    align-self: flex-end;
+  }
+}
+
+/* Small Mobile (max-width: 480px) */
+@media (max-width: 480px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .sidenav-menu {
+    flex-direction: column;
+  }
+  
+  .sidenav-menu li a:hover {
+    transform: none;
+  }
 }
