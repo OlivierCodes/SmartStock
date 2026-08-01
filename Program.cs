@@ -168,8 +168,8 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<SmartStockDbContext>();
     await db.Database.MigrateAsync();
 
-    // Alimentation automatique de démonstration si vide
-    await SmartStock.Data.DbSeeder.SeedDataAsync(scope.ServiceProvider);
+    // Alimentation automatique de démonstration désactivée pour maintenir une base propre
+    // await SmartStock.Data.DbSeeder.SeedDataAsync(scope.ServiceProvider);
 }
 
 // ── Pipeline HTTP ──────────────────────────────────────────────────────────────
