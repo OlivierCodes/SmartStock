@@ -10,6 +10,9 @@ using SmartStock.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ── License QuestPDF (Communautaire) ───────────────────────────────────────────
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 // ── Configuration ──────────────────────────────────────────────────────────────
 var config = builder.Configuration;
 

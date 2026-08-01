@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using SmartStock.Data;
 using SmartStock.Models.DTOs;
 using SmartStock.Models.Entities;
@@ -387,5 +390,234 @@ public class DashboardService : IDashboardService
             todayMovements.Count(m => m.Type == MovementType.Sortie),
             topProducts, lowStockAlerts
         );
+    }
+
+    public async Task<byte[]> GenerateDailyReportPdfAsync(DateTime? targetDate = null)
+    {
+        var date = (targetDate ?? DateTime.UtcNow).Date;
+        var dateEnd = date.AddDays(1);
+
+        var sales = await _context.Sales
+            .Include(s => s.Seller)
+            .Include(s => s.Items).ThenInclude(i => i.Product)
+            .Where(s => s.SoldAt >= date && s.SoldAt < dateEnd && s.Status == SaleStatus.Completed)
+            .OrderBy(s => s.SoldAt)
+            .ToListAsync();
+
+        var movements = await _context.StockMovements
+            .Include(sm => sm.Product)
+            .Include(sm => sm.User)
+            .Where(sm => sm.MovedAt >= date && sm.MovedAt < dateEnd)
+            .OrderBy(sm => sm.MovedAt)
+            .ToListAsync();
+
+        var inventory = await _context.Products
+            .Where(p => p.IsActive)
+            .OrderBy(p => p.Name)
+            .ToListAsync();
+
+        var totalSalesAmount = sales.Sum(s => s.TotalAmount);
+        var totalItemsSold = sales.Sum(s => s.Items.Sum(i => i.Quantity));
+        var totalEntries = movements.Where(m => m.Type == MovementType.Entree).Sum(m => m.Quantity);
+        var totalExits = movements.Where(m => m.Type == MovementType.Sortie).Sum(m => m.Quantity);
+
+        var document = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4);
+                page.Margin(1.5f, Unit.Centimetre);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(x => x.FontSize(10));
+
+                page.Header().Element(ComposeHeader);
+                page.Content().Element(ComposeContent);
+                page.Footer().Element(ComposeFooter);
+
+                void ComposeHeader(IContainer container)
+                {
+                    container.Row(row =>
+                    {
+                        row.RelativeItem().Column(col =>
+                        {
+                            col.Item().Text("SMARTSTOCK").FontSize(24).Bold().FontColor(Colors.Blue.Darken2);
+                            col.Item().Text("Rapport Statistique & Inventaire Journalier").FontSize(13).SemiBold().FontColor(Colors.Grey.Darken2);
+                        });
+
+                        row.ConstantItem(160).AlignRight().Column(col =>
+                        {
+                            col.Item().Text($"Date : {date:dd/MM/yyyy}").FontSize(12).Bold();
+                            col.Item().Text($"Généré le : {DateTime.UtcNow:dd/MM/yyyy HH:mm} UTC").FontSize(8).FontColor(Colors.Grey.Medium);
+                        });
+                    });
+                }
+
+                void ComposeContent(IContainer container)
+                {
+                    container.PaddingVertical(1, Unit.Centimetre).Column(column =>
+                    {
+                        column.Spacing(15);
+
+                        // Section 1: Résumé KPI
+                        column.Item().Text("1. RÉSUMÉ DES STATISTIQUES DE LA JOURNÉE").FontSize(11).Bold().FontColor(Colors.Blue.Darken2);
+                        column.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(1);
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Chiffre d'Affaires").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Ventes Réalisées").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Articles Vendus").Bold();
+                                header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Mouvements Stock").Bold();
+                            });
+
+                            table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Text($"{totalSalesAmount:N2} F").FontSize(12).Bold().FontColor(Colors.Green.Darken2);
+                            table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Text($"{sales.Count} vente(s)").FontSize(11);
+                            table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Text($"{totalItemsSold} article(s)").FontSize(11);
+                            table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Text($"+{totalEntries} / -{totalExits}").FontSize(11);
+                        });
+
+                        // Section 2: Ventes du jour
+                        column.Item().Text("2. DÉTAIL DES VENTES DU JOUR").FontSize(11).Bold().FontColor(Colors.Blue.Darken2);
+                        if (sales.Any())
+                        {
+                            column.Item().Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.ConstantColumn(90);
+                                    columns.ConstantColumn(45);
+                                    columns.RelativeColumn(2);
+                                    columns.RelativeColumn(2);
+                                    columns.RelativeColumn(1);
+                                });
+
+                                table.Header(header =>
+                                {
+                                    header.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("Référence").Bold();
+                                    header.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("Heure").Bold();
+                                    header.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("Client / Notes").Bold();
+                                    header.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("Vendeur").Bold();
+                                    header.Cell().Background(Colors.Blue.Lighten4).Padding(4).AlignRight().Text("Montant").Bold();
+                                });
+
+                                foreach (var s in sales)
+                                {
+                                    table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(3).Text(s.SaleNumber);
+                                    table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(3).Text(s.SoldAt.ToString("HH:mm"));
+                                    table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(3).Text(s.CustomerName ?? s.Notes ?? "-");
+                                    table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(3).Text($"{s.Seller?.FirstName} {s.Seller?.LastName}".Trim());
+                                    table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(3).AlignRight().Text($"{s.TotalAmount:N2} F");
+                                }
+                            });
+                        }
+                        else
+                        {
+                            column.Item().Text("Aucune vente enregistrée aujourd'hui.").Italic().FontColor(Colors.Grey.Medium);
+                        }
+
+                        // Section 3: Mouvements de stock du jour
+                        column.Item().Text("3. MOUVEMENTS DE STOCK DE LA JOURNÉE").FontSize(11).Bold().FontColor(Colors.Blue.Darken2);
+                        if (movements.Any())
+                        {
+                            column.Item().Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.ConstantColumn(45);
+                                    columns.ConstantColumn(55);
+                                    columns.RelativeColumn(2);
+                                    columns.ConstantColumn(40);
+                                    columns.RelativeColumn(2);
+                                });
+
+                                table.Header(header =>
+                                {
+                                    header.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("Heure").Bold();
+                                    header.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("Type").Bold();
+                                    header.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("Produit").Bold();
+                                    header.Cell().Background(Colors.Blue.Lighten4).Padding(4).AlignRight().Text("Qté").Bold();
+                                    header.Cell().Background(Colors.Blue.Lighten4).Padding(4).Text("Raison (Agent)").Bold();
+                                });
+
+                                foreach (var m in movements)
+                                {
+                                    var typeStr = m.Type == MovementType.Entree ? "ENTRÉE" : "SORTIE";
+                                    var typeColor = m.Type == MovementType.Entree ? Colors.Green.Darken2 : Colors.Orange.Darken2;
+
+                                    table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(3).Text(m.MovedAt.ToString("HH:mm"));
+                                    table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(3).Text(typeStr).FontColor(typeColor).Bold();
+                                    table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(3).Text(m.Product?.Name ?? "Inconnu");
+                                    table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(3).AlignRight().Text(m.Quantity.ToString());
+                                    table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(3).Text($"{m.Reason} ({m.User?.FirstName})");
+                                }
+                            });
+                        }
+                        else
+                        {
+                            column.Item().Text("Aucun mouvement de stock enregistré aujourd'hui.").Italic().FontColor(Colors.Grey.Medium);
+                        }
+
+                        // Section 4: Inventaire actuel
+                        column.Item().PaddingTop(10).Text("4. ÉTAT DE L'INVENTAIRE ACTUEL & ALERTES").FontSize(11).Bold().FontColor(Colors.Blue.Darken2);
+                        if (inventory.Any())
+                        {
+                            column.Item().Table(table =>
+                            {
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.ConstantColumn(80);
+                                    columns.RelativeColumn(3);
+                                    columns.RelativeColumn(1);
+                                    columns.RelativeColumn(1);
+                                    columns.RelativeColumn(1);
+                                });
+
+                                table.Header(header =>
+                                {
+                                    header.Cell().Background(Colors.Grey.Lighten3).Padding(4).Text("SKU").Bold();
+                                    header.Cell().Background(Colors.Grey.Lighten3).Padding(4).Text("Produit").Bold();
+                                    header.Cell().Background(Colors.Grey.Lighten3).Padding(4).AlignRight().Text("Stock Actuel").Bold();
+                                    header.Cell().Background(Colors.Grey.Lighten3).Padding(4).AlignRight().Text("Seuil Min").Bold();
+                                    header.Cell().Background(Colors.Grey.Lighten3).Padding(4).Text("Statut").Bold();
+                                });
+
+                                foreach (var p in inventory)
+                                {
+                                    var status = p.CurrentStock == 0 ? "RUPTURE" : (p.CurrentStock <= p.MinStockThreshold ? "FAIBLE" : "OK");
+                                    var statusColor = p.CurrentStock == 0 ? Colors.Red.Darken2 : (p.CurrentStock <= p.MinStockThreshold ? Colors.Orange.Darken2 : Colors.Green.Darken2);
+                                    
+                                    table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(3).Text(p.SKU ?? "-");
+                                    table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(3).Text(p.Name);
+                                    table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(3).AlignRight().Text($"{p.CurrentStock} {p.Unit}");
+                                    table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(3).AlignRight().Text(p.MinStockThreshold.ToString());
+                                    table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(3).Text(status).FontColor(statusColor).Bold();
+                                }
+                            });
+                        }
+                    });
+                }
+
+                void ComposeFooter(IContainer container)
+                {
+                    container.AlignCenter().Text(x =>
+                    {
+                        x.Span("SmartStock - Rapport & Inventaire Journalier - Page ");
+                        x.CurrentPageNumber();
+                        x.Span(" sur ");
+                        x.TotalPages();
+                    });
+                }
+            });
+        });
+
+        return document.GeneratePdf();
     }
 }
