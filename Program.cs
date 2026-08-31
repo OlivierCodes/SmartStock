@@ -21,6 +21,8 @@ var dbProvider = config["DatabaseProvider"] ?? "SqlServer";
 
 builder.Services.AddDbContext<SmartStockDbContext>(options =>
 {
+    options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+
     if (dbProvider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase))
     {
         options.UseNpgsql(

@@ -34,7 +34,7 @@ public class Product
     [Column(TypeName = "decimal(18,2)")]
     public decimal LastPrice { get; set; }
 
-    [Column(TypeName = "decimal(18,2)")]
+    [NotMapped]
     public decimal SellingPrice
     {
         get => RetailPrice;

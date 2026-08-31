@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SmartStock.Data;
@@ -11,9 +12,11 @@ using SmartStock.Data;
 namespace SmartStock.Migrations
 {
     [DbContext(typeof(SmartStockDbContext))]
-    partial class SmartStockDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260831213000_AddThreePriceTiersToProduct")]
+    partial class AddThreePriceTiersToProduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -104,6 +107,12 @@ namespace SmartStock.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<decimal>("LastPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MediumPrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("MinStockThreshold")
                         .HasColumnType("integer");
 
@@ -116,12 +125,6 @@ namespace SmartStock.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("RetailPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("MediumPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("LastPrice")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("SKU")
