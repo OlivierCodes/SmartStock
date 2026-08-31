@@ -39,7 +39,7 @@ public class ExceptionHandlingMiddleware
             UnauthorizedAccessException => (HttpStatusCode.Unauthorized, exception.Message),
             InvalidOperationException => (HttpStatusCode.BadRequest, exception.Message),
             ArgumentException => (HttpStatusCode.BadRequest, exception.Message),
-            _ => (HttpStatusCode.InternalServerError, "Une erreur interne est survenue. Veuillez réessayer plus tard.")
+            _ => (HttpStatusCode.InternalServerError, exception.Message.Length > 0 ? exception.Message : "Une erreur interne est survenue. Veuillez réessayer plus tard.")
         };
 
         context.Response.StatusCode = (int)statusCode;

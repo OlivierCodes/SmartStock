@@ -194,13 +194,15 @@
             }
 
             const id = document.getElementById('p_id').value;
-            const name = document.getElementById('p_name').value;
-            const sku = document.getElementById('p_sku').value;
-            const categoryId = parseInt(document.getElementById('p_category').value);
+            const name = (document.getElementById('p_name').value || '').trim();
+            const rawSku = (document.getElementById('p_sku').value || '').trim();
+            const sku = rawSku.length > 0 ? rawSku : null;
+            const rawCatId = parseInt(document.getElementById('p_category').value);
+            const categoryId = isNaN(rawCatId) || rawCatId <= 0 ? null : rawCatId;
             const retailPrice = parseFloat(document.getElementById('p_retail_price').value) || 0;
             const mediumPrice = parseFloat(document.getElementById('p_medium_price').value) || retailPrice;
             const lastPrice = parseFloat(document.getElementById('p_last_price').value) || mediumPrice;
-            const minStockThreshold = parseInt(document.getElementById('p_minstock').value);
+            const minStockThreshold = parseInt(document.getElementById('p_minstock').value) || 0;
             const initialStock = parseInt(document.getElementById('p_stock').value) || 0;
             
             const isEdit = id !== '';
@@ -229,7 +231,7 @@
                     sellingPrice: retailPrice,
                     initialStock: initialStock,
                     minStockThreshold: minStockThreshold,
-                    unit: "unité",
+                    unit: "pcs",
                     categoryId: categoryId
                 };
             }
