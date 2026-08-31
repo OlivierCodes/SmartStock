@@ -39,6 +39,12 @@ namespace SmartStock.Migrations
                     ""LastPrice"" = ""SellingPrice""
                 WHERE ""RetailPrice"" = 0;
             ");
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "SellingPrice",
+                table: "Products",
+                type: "numeric(18,2)",
+                nullable: true);
         }
 
         /// <inheritdoc />

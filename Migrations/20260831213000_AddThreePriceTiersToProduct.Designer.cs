@@ -131,6 +131,9 @@ namespace SmartStock.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<decimal>("SellingPrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Unit")
                         .IsRequired()
                         .HasMaxLength(50)
