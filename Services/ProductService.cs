@@ -140,7 +140,10 @@ public class ProductService : IProductService
         _context.Products.Add(product);
         await _context.SaveChangesAsync();
 
-        await _context.Entry(product).Reference(p => p.Category).LoadAsync();
+        if (product.CategoryId.HasValue)
+        {
+            await _context.Entry(product).Reference(p => p.Category).LoadAsync();
+        }
         return MapToDto(product);
     }
 
@@ -170,7 +173,10 @@ public class ProductService : IProductService
         product.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
-        await _context.Entry(product).Reference(p => p.Category).LoadAsync();
+        if (product.CategoryId.HasValue)
+        {
+            await _context.Entry(product).Reference(p => p.Category).LoadAsync();
+        }
         return MapToDto(product);
     }
 

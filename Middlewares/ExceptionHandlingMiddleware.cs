@@ -33,13 +33,19 @@ public class ExceptionHandlingMiddleware
 
     private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
+        var innermostException = exception;
+        while (innermostException.InnerException != null)
+        {
+            innermostException = innermostException.InnerException;
+        }
+
         var (statusCode, message) = exception switch
         {
             KeyNotFoundException => (HttpStatusCode.NotFound, exception.Message),
             UnauthorizedAccessException => (HttpStatusCode.Unauthorized, exception.Message),
-            InvalidOperationException => (HttpStatusCode.BadRequest, exception.Message),
+            InvalidOperationException => (HttpStatusCode.BadRequest, innermostException.Message),
             ArgumentException => (HttpStatusCode.BadRequest, exception.Message),
-            _ => (HttpStatusCode.InternalServerError, exception.Message.Length > 0 ? exception.Message : "Une erreur interne est survenue. Veuillez réessayer plus tard.")
+            _ => (HttpStatusCode.InternalServerError, innermostException.Message.Length > 0 ? innermostException.Message : "Une erreur interne est survenue. Veuillez réessayer plus tard.")
         };
 
         context.Response.StatusCode = (int)statusCode;
