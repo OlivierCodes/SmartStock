@@ -118,13 +118,19 @@ public class ProductService : IProductService
         if (request.CategoryId.HasValue && !await _context.Categories.AnyAsync(c => c.Id == request.CategoryId))
             throw new KeyNotFoundException($"Catégorie {request.CategoryId} introuvable.");
 
+        var retail = request.RetailPrice > 0 ? request.RetailPrice : (request.SellingPrice ?? 0);
+        var medium = request.MediumPrice > 0 ? request.MediumPrice : retail;
+        var last = request.LastPrice > 0 ? request.LastPrice : medium;
+
         var product = new Product
         {
             Name = request.Name,
             SKU = request.SKU,
             Description = request.Description,
             PurchasePrice = request.PurchasePrice,
-            SellingPrice = request.SellingPrice,
+            RetailPrice = retail,
+            MediumPrice = medium,
+            LastPrice = last,
             CurrentStock = request.InitialStock,
             MinStockThreshold = request.MinStockThreshold,
             Unit = request.Unit,
@@ -153,7 +159,10 @@ public class ProductService : IProductService
         }
         if (request.Description is not null) product.Description = request.Description;
         if (request.PurchasePrice.HasValue) product.PurchasePrice = request.PurchasePrice.Value;
-        if (request.SellingPrice.HasValue) product.SellingPrice = request.SellingPrice.Value;
+        if (request.RetailPrice.HasValue) product.RetailPrice = request.RetailPrice.Value;
+        else if (request.SellingPrice.HasValue) product.RetailPrice = request.SellingPrice.Value;
+        if (request.MediumPrice.HasValue) product.MediumPrice = request.MediumPrice.Value;
+        if (request.LastPrice.HasValue) product.LastPrice = request.LastPrice.Value;
         if (request.MinStockThreshold.HasValue) product.MinStockThreshold = request.MinStockThreshold.Value;
         if (request.Unit is not null) product.Unit = request.Unit;
         if (request.IsActive.HasValue) product.IsActive = request.IsActive.Value;
@@ -189,7 +198,8 @@ public class ProductService : IProductService
     }
 
     internal static ProductDto MapToDto(Product p) => new(
-        p.Id, p.Name, p.SKU, p.Description, p.PurchasePrice, p.SellingPrice,
+        p.Id, p.Name, p.SKU, p.Description, p.PurchasePrice,
+        p.RetailPrice, p.MediumPrice, p.LastPrice, p.SellingPrice,
         p.CurrentStock, p.MinStockThreshold, p.Unit, p.IsActive,
         p.CurrentStock <= p.MinStockThreshold,
         p.CategoryId, p.Category?.Name, p.CreatedAt, p.UpdatedAt

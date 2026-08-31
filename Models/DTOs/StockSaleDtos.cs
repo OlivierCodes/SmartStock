@@ -71,7 +71,8 @@ public record CreateSaleRequest(
 
 public record CreateSaleItemRequest(
     [Required] int ProductId,
-    [Required, Range(1, int.MaxValue)] int Quantity
+    [Required, Range(1, int.MaxValue)] int Quantity,
+    [Range(0, double.MaxValue)] decimal? UnitPrice = null
 );
 
 public record SaleListParams(

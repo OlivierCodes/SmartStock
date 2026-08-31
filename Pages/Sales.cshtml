@@ -65,16 +65,31 @@
                             <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"></i>
                         </div>
                     </div>
-                    <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
-                        <div style="flex: 1;">
-                            <select id="s_product_select">
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                        <div>
+                            <select id="s_product_select" onchange="onProductSelected()">
                                 <option disabled selected value="">Sélectionner un produit...</option>
                             </select>
                         </div>
-                        <div style="width: 100px;">
-                            <input type="number" id="s_product_qty" min="1" value="1" placeholder="Qté">
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <div style="flex: 2;">
+                                <select id="s_price_type" onchange="onPriceTypeChanged()" style="width: 100%;">
+                                    <option value="retail">Prix Détaillant</option>
+                                    <option value="medium">Prix Moyen</option>
+                                    <option value="last">Dernier Prix</option>
+                                    <option value="custom">Prix Personnalisé</option>
+                                </select>
+                            </div>
+                            <div style="flex: 1.5;">
+                                <input type="number" step="0.01" id="s_unit_price" placeholder="P.U. (FCFA)">
+                            </div>
+                            <div style="width: 80px;">
+                                <input type="number" id="s_product_qty" min="1" value="1" placeholder="Qté">
+                            </div>
+                            <button type="button" class="btn-primary" onclick="addToCart()" style="white-space: nowrap;">
+                                <i class="fa-solid fa-plus"></i> Ajouter
+                            </button>
                         </div>
-                        <button type="button" class="btn-primary" onclick="addToCart()">Ajouter</button>
                     </div>
                 </div>
 
@@ -84,6 +99,7 @@
                         <thead>
                             <tr>
                                 <th>Produit</th>
+                                <th>Type Prix</th>
                                 <th>P.U.</th>
                                 <th>Qté</th>
                                 <th>Total</th>
@@ -91,7 +107,7 @@
                             </tr>
                         </thead>
                         <tbody id="cartTableBody">
-                            <tr><td colspan="5" class="text-center" style="color: var(--text-muted); padding: 1rem;">Le panier est vide.</td></tr>
+                            <tr><td colspan="6" class="text-center" style="color: var(--text-muted); padding: 1rem;">Le panier est vide.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -190,15 +206,53 @@
                 return;
             }
 
-            select.innerHTML = '<option disabled selected value="">Sélectionner un produit...</option>' + productsToRender.map(p => 
-                `<option value="${p.id ?? p.Id}" data-price="${p.sellingPrice ?? p.SellingPrice}">[${p.sku || p.sKU || p.SKU || 'N/A'}] ${p.name || p.Name} - ${(p.sellingPrice ?? p.SellingPrice).toFixed(2)} FCFA (Stock: ${p.currentStock ?? p.CurrentStock})</option>`
-            ).join('');
+            select.innerHTML = '<option disabled selected value="">Sélectionner un produit...</option>' + productsToRender.map(p => {
+                const retail = p.retailPrice ?? p.RetailPrice ?? p.sellingPrice ?? p.SellingPrice ?? 0;
+                const medium = p.mediumPrice ?? p.MediumPrice ?? retail;
+                const last = p.lastPrice ?? p.LastPrice ?? medium;
+                return `<option value="${p.id ?? p.Id}" data-retail="${retail}" data-medium="${medium}" data-last="${last}">[${p.sku || p.sKU || p.SKU || 'N/A'}] ${p.name || p.Name} - Détaillant: ${retail.toFixed(2)} / Moyen: ${medium.toFixed(2)} / Dernier: ${last.toFixed(2)} FCFA (Stock: ${p.currentStock ?? p.CurrentStock})</option>`;
+            }).join('');
 
             if (selectedId) {
                 select.value = selectedId;
+                onProductSelected();
             } else if (productsToRender.length === 1) {
-                // Auto-select if single match found
                 select.value = productsToRender[0].id ?? productsToRender[0].Id;
+                onProductSelected();
+            }
+        }
+
+        function onProductSelected() {
+            const select = document.getElementById('s_product_select');
+            const selectedOption = select.options[select.selectedIndex];
+            if (!selectedOption || !selectedOption.dataset) return;
+
+            onPriceTypeChanged();
+        }
+
+        function onPriceTypeChanged() {
+            const select = document.getElementById('s_product_select');
+            const selectedOption = select.options[select.selectedIndex];
+            if (!selectedOption || !selectedOption.dataset) return;
+
+            const type = document.getElementById('s_price_type').value;
+            const unitPriceInput = document.getElementById('s_unit_price');
+            const retail = parseFloat(selectedOption.dataset.retail) || 0;
+            const medium = parseFloat(selectedOption.dataset.medium) || retail;
+            const last = parseFloat(selectedOption.dataset.last) || medium;
+
+            if (type === 'retail') {
+                unitPriceInput.value = retail.toFixed(2);
+                unitPriceInput.readOnly = true;
+            } else if (type === 'medium') {
+                unitPriceInput.value = medium.toFixed(2);
+                unitPriceInput.readOnly = true;
+            } else if (type === 'last') {
+                unitPriceInput.value = last.toFixed(2);
+                unitPriceInput.readOnly = true;
+            } else {
+                unitPriceInput.readOnly = false;
+                unitPriceInput.focus();
             }
         }
 
@@ -227,6 +281,8 @@
             updateCartUI();
             const select = document.getElementById('s_product_select');
             select.innerHTML = '<option disabled selected value="">Chargement...</option>';
+            document.getElementById('s_unit_price').value = '';
+            document.getElementById('s_price_type').value = 'retail';
             document.getElementById('saleModal').classList.add('show');
             
             try {
@@ -247,23 +303,37 @@
         function addToCart() {
             const select = document.getElementById('s_product_select');
             const qtyInput = document.getElementById('s_product_qty');
+            const unitPriceInput = document.getElementById('s_unit_price');
+            const priceTypeSelect = document.getElementById('s_price_type');
             
             const productId = parseInt(select.value);
             const qty = parseInt(qtyInput.value);
+            const unitPrice = parseFloat(unitPriceInput.value);
             
-            if (!productId || isNaN(qty) || qty <= 0) return;
+            if (!productId || isNaN(qty) || qty <= 0) {
+                showToast("Veuillez sélectionner un produit et une quantité valide", "warning");
+                return;
+            }
+
+            if (isNaN(unitPrice) || unitPrice < 0) {
+                showToast("Veuillez renseigner un prix unitaire valide", "warning");
+                return;
+            }
             
             const product = allProducts.find(p => (p.id ?? p.Id) === productId);
             if (!product) return;
+
+            const priceTypeLabel = priceTypeSelect.options[priceTypeSelect.selectedIndex].text;
             
-            const existingItem = cartItems.find(i => i.productId === productId);
-            if (existingItem) {
-                existingItem.quantity += qty;
+            const existingIndex = cartItems.findIndex(i => i.productId === productId && i.price === unitPrice);
+            if (existingIndex !== -1) {
+                cartItems[existingIndex].quantity += qty;
             } else {
                 cartItems.push({
                     productId: productId,
                     name: product.name || product.Name,
-                    price: product.sellingPrice ?? product.SellingPrice,
+                    priceType: priceTypeLabel,
+                    price: unitPrice,
                     quantity: qty
                 });
             }
@@ -271,12 +341,14 @@
             // Reset fields
             select.value = '';
             qtyInput.value = 1;
+            unitPriceInput.value = '';
+            priceTypeSelect.value = 'retail';
             
             updateCartUI();
         }
 
-        function removeFromCart(productId) {
-            cartItems = cartItems.filter(i => i.productId !== productId);
+        function removeFromCart(index) {
+            cartItems.splice(index, 1);
             updateCartUI();
         }
 
@@ -285,22 +357,23 @@
             const totalInput = document.getElementById('s_total');
             
             if (cartItems.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center" style="color: var(--text-muted); padding: 1rem;">Le panier est vide.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="color: var(--text-muted); padding: 1rem;">Le panier est vide.</td></tr>';
                 totalInput.value = "0.00";
                 return;
             }
             
             let total = 0;
-            tbody.innerHTML = cartItems.map(item => {
+            tbody.innerHTML = cartItems.map((item, idx) => {
                 const lineTotal = item.price * item.quantity;
                 total += lineTotal;
                 return `
                     <tr>
                         <td>${item.name}</td>
+                        <td><span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-size: 0.75rem;">${item.priceType || 'Détaillant'}</span></td>
                         <td>${item.price.toFixed(2)} FCFA</td>
                         <td>${item.quantity}</td>
                         <td style="font-weight: bold;">${lineTotal.toFixed(2)} FCFA</td>
-                        <td style="text-align: right;"><button type="button" class="btn-icon" style="color: var(--danger); font-size: 0.9rem;" onclick="removeFromCart(${item.productId})"><i class="fa-solid fa-xmark"></i></button></td>
+                        <td style="text-align: right;"><button type="button" class="btn-icon" style="color: var(--danger); font-size: 0.9rem;" onclick="removeFromCart(${idx})"><i class="fa-solid fa-xmark"></i></button></td>
                     </tr>
                 `;
             }).join('');
@@ -326,7 +399,8 @@
 
             const items = cartItems.map(i => ({
                 productId: i.productId,
-                quantity: i.quantity
+                quantity: i.quantity,
+                unitPrice: i.price
             }));
 
             const requestBody = {

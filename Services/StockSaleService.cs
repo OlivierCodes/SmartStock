@@ -201,7 +201,10 @@ public class SaleService : ISaleService
         foreach (var itemReq in request.Items)
         {
             var product = products.First(p => p.Id == itemReq.ProductId);
-            var lineTotal = product.SellingPrice * itemReq.Quantity;
+            var unitPrice = itemReq.UnitPrice.HasValue && itemReq.UnitPrice.Value >= 0 
+                ? itemReq.UnitPrice.Value 
+                : product.RetailPrice;
+            var lineTotal = unitPrice * itemReq.Quantity;
             total += lineTotal;
 
             // Déduire du stock
@@ -212,7 +215,7 @@ public class SaleService : ISaleService
             {
                 ProductId = itemReq.ProductId,
                 Quantity = itemReq.Quantity,
-                UnitPrice = product.SellingPrice,
+                UnitPrice = unitPrice,
                 TotalPrice = lineTotal
             });
         }

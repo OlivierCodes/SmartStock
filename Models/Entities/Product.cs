@@ -22,8 +22,24 @@ public class Product
     [Column(TypeName = "decimal(18,2)")]
     public decimal PurchasePrice { get; set; }
 
+    /// <summary>Prix détaillant (prix standard)</summary>
     [Column(TypeName = "decimal(18,2)")]
-    public decimal SellingPrice { get; set; }
+    public decimal RetailPrice { get; set; }
+
+    /// <summary>Prix moyen</summary>
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal MediumPrice { get; set; }
+
+    /// <summary>Dernier prix (prix plancher / minimum)</summary>
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal LastPrice { get; set; }
+
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal SellingPrice
+    {
+        get => RetailPrice;
+        set => RetailPrice = value;
+    }
 
     /// <summary>Quantité actuellement disponible en stock.</summary>
     public int CurrentStock { get; set; } = 0;
