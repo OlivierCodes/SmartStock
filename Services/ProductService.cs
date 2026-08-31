@@ -122,6 +122,9 @@ public class ProductService : IProductService
         var medium = request.MediumPrice > 0 ? request.MediumPrice : retail;
         var last = request.LastPrice > 0 ? request.LastPrice : medium;
 
+        var shopStock = request.InitialShopStock ?? request.InitialStock ?? 0;
+        var warehouseStock = request.InitialWarehouseStock ?? 0;
+
         var product = new Product
         {
             Name = request.Name,
@@ -131,7 +134,9 @@ public class ProductService : IProductService
             RetailPrice = retail,
             MediumPrice = medium,
             LastPrice = last,
-            CurrentStock = request.InitialStock,
+            SellingPrice = retail,
+            ShopStock = shopStock,
+            WarehouseStock = warehouseStock,
             MinStockThreshold = request.MinStockThreshold,
             Unit = request.Unit,
             CategoryId = request.CategoryId
@@ -162,10 +167,12 @@ public class ProductService : IProductService
         }
         if (request.Description is not null) product.Description = request.Description;
         if (request.PurchasePrice.HasValue) product.PurchasePrice = request.PurchasePrice.Value;
-        if (request.RetailPrice.HasValue) product.RetailPrice = request.RetailPrice.Value;
-        else if (request.SellingPrice.HasValue) product.RetailPrice = request.SellingPrice.Value;
+        if (request.RetailPrice.HasValue) { product.RetailPrice = request.RetailPrice.Value; product.SellingPrice = request.RetailPrice.Value; }
+        else if (request.SellingPrice.HasValue) { product.RetailPrice = request.SellingPrice.Value; product.SellingPrice = request.SellingPrice.Value; }
         if (request.MediumPrice.HasValue) product.MediumPrice = request.MediumPrice.Value;
         if (request.LastPrice.HasValue) product.LastPrice = request.LastPrice.Value;
+        if (request.ShopStock.HasValue) product.ShopStock = request.ShopStock.Value;
+        if (request.WarehouseStock.HasValue) product.WarehouseStock = request.WarehouseStock.Value;
         if (request.MinStockThreshold.HasValue) product.MinStockThreshold = request.MinStockThreshold.Value;
         if (request.Unit is not null) product.Unit = request.Unit;
         if (request.IsActive.HasValue) product.IsActive = request.IsActive.Value;
@@ -197,8 +204,8 @@ public class ProductService : IProductService
     {
         return await _context.Products
             .Include(p => p.Category)
-            .Where(p => p.IsActive && p.CurrentStock <= p.MinStockThreshold)
-            .OrderBy(p => p.CurrentStock)
+            .Where(p => p.IsActive && (p.ShopStock + p.WarehouseStock) <= p.MinStockThreshold)
+            .OrderBy(p => p.ShopStock + p.WarehouseStock)
             .Select(p => MapToDto(p))
             .ToListAsync();
     }
@@ -206,7 +213,7 @@ public class ProductService : IProductService
     internal static ProductDto MapToDto(Product p) => new(
         p.Id, p.Name, p.SKU, p.Description, p.PurchasePrice,
         p.RetailPrice, p.MediumPrice, p.LastPrice, p.SellingPrice,
-        p.CurrentStock, p.MinStockThreshold, p.Unit, p.IsActive,
+        p.ShopStock, p.WarehouseStock, p.CurrentStock, p.MinStockThreshold, p.Unit, p.IsActive,
         p.CurrentStock <= p.MinStockThreshold,
         p.CategoryId, p.Category?.Name, p.CreatedAt, p.UpdatedAt
     );

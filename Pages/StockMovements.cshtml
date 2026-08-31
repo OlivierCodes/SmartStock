@@ -1,4 +1,4 @@
-@page
+﻿@page
 @{
     ViewData["Title"] = "Mouvements de Stock";
     Layout = "_DashboardLayout";
@@ -7,19 +7,26 @@
 <div class="dashboard-header">
     <div class="dashboard-title">
         <h1>Mouvements de Stock</h1>
-        <p>Suivez les entrées, sorties et ajustements d'inventaire.</p>
+        <p>EntrÃ©es magasin, sorties, et transferts Magasin â†’ Boutique.</p>
     </div>
-    <button class="btn-primary" onclick="loadMovements()">
-        <i class="fa-solid fa-rotate-right"></i>
-        <span>Actualiser</span>
-    </button>
+    <div style="display:flex; gap:0.75rem;">
+        <button class="btn-secondary" onclick="openTransferModal()" style="padding:0.6rem 1.1rem; font-size:0.9rem; border-radius:8px;">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> PrÃ©lÃ¨vement Magasin â†’ Boutique
+        </button>
+        <button class="btn-primary" onclick="openMovementModal()">
+            <i class="fa-solid fa-arrow-right-arrow-left"></i> Nouveau Mouvement
+        </button>
+    </div>
 </div>
+
+<!-- Stock Summary Cards -->
+<div id="stockSummaryCards" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:1rem; margin-bottom:1.5rem; display:none;"></div>
 
 <div class="glass-card">
     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
         <h3 class="card-title">Historique des Mouvements</h3>
-        <button class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="openMovementModal()">
-            <i class="fa-solid fa-arrow-right-arrow-left"></i> Nouveau Mouvement
+        <button class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="loadMovements()">
+            <i class="fa-solid fa-rotate-right"></i> Actualiser
         </button>
     </div>
     <div class="table-responsive">
@@ -29,11 +36,11 @@
                     <th>Date</th>
                     <th>Type</th>
                     <th>Produit</th>
-                    <th>Quantité</th>
-                    <th>Stock Final</th>
-                    <th>Raison / Référence</th>
+                    <th>QuantitÃ©</th>
+                    <th>Stock Total AprÃ¨s</th>
+                    <th>Raison / RÃ©fÃ©rence</th>
+                    <th>DÃ©lÃ©guÃ©</th>
                     <th>Utilisateur</th>
-                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -45,43 +52,90 @@
     </div>
 </div>
 
-<!-- Modal Stock Movement -->
+<!-- Modal: EntrÃ©e / Sortie Standard -->
 <div class="modal-overlay" id="movementModal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3 id="movementModalTitle">Nouveau Mouvement</h3>
-            <button class="modal-close" onclick="closeMovementModal()"><i class="fa-solid fa-xmark"></i></button>
+            <h3><i class="fa-solid fa-arrow-right-arrow-left"></i> Nouveau Mouvement</h3>
+            <button class="modal-close" onclick="closeModal('movementModal')"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <form id="movementForm" onsubmit="saveMovement(event)">
             <div class="form-group">
                 <label>Produit</label>
                 <select id="m_product" required>
-                    <option value="1">Macadamia 500g</option>
-                    <option value="2">Boisson Énergétique</option>
-                    <option value="3">Savon Liquide</option>
+                    <option disabled selected>Chargement...</option>
                 </select>
+                <small id="m_stockInfo" style="color: var(--text-muted); margin-top:4px; display:block;"></small>
             </div>
             <div class="form-group" style="display: flex; gap: 1rem;">
                 <div style="flex: 1;">
                     <label>Type de Mouvement</label>
                     <select id="m_type" required>
-                        <option value="In">Entrée (+)</option>
-                        <option value="Out">Sortie (-)</option>
-                        <option value="Adjustment">Ajustement (=)</option>
+                        <option value="0">ðŸ“¦ EntrÃ©e Magasin (+)</option>
+                        <option value="1">ðŸ”» Sortie / Perte (-)</option>
                     </select>
                 </div>
                 <div style="flex: 1;">
-                    <label>Quantité</label>
+                    <label>QuantitÃ©</label>
                     <input type="number" id="m_quantity" required min="1" value="1">
                 </div>
             </div>
             <div class="form-group">
-                <label>Raison / Référence</label>
-                <input type="text" id="m_reason" placeholder="Ex: Réapprovisionnement FR-442">
+                <label>Raison</label>
+                <input type="text" id="m_reason" placeholder="Ex: RÃ©approvisionnement fournisseur">
+            </div>
+            <div class="form-group">
+                <label>RÃ©fÃ©rence</label>
+                <input type="text" id="m_reference" placeholder="Ex: BL-2026-0042">
             </div>
             <div class="modal-actions">
-                <button type="button" class="btn-secondary" onclick="closeMovementModal()">Annuler</button>
+                <button type="button" class="btn-secondary" onclick="closeModal('movementModal')">Annuler</button>
                 <button type="submit" class="btn-primary">Enregistrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Transfert Magasin â†’ Boutique (PrÃ©lÃ¨vement) -->
+<div class="modal-overlay" id="transferModal">
+    <div class="modal-content">
+        <div class="modal-header" style="background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(59,130,246,0.1)); border-radius:8px 8px 0 0; padding:1rem 1.25rem;">
+            <h3><i class="fa-solid fa-truck-fast" style="color: var(--primary);"></i> PrÃ©lÃ¨vement Magasin â†’ Boutique</h3>
+            <button class="modal-close" onclick="closeModal('transferModal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form id="transferForm" onsubmit="saveTransfer(event)">
+            <div class="form-group" style="margin-top:1rem;">
+                <label>Produit Ã  prÃ©lever</label>
+                <select id="t_product" required onchange="onTransferProductChange(this)">
+                    <option disabled selected>Chargement...</option>
+                </select>
+            </div>
+            <!-- Infos stock actuel -->
+            <div id="t_stockInfo" style="display:none; margin-bottom:1rem; padding:0.75rem 1rem; border-radius:8px; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2);">
+                <div style="display:flex; gap:1.5rem; font-size:0.9rem;">
+                    <div><i class="fa-solid fa-warehouse" style="color:#8b5cf6; margin-right:5px;"></i><strong>Magasin : </strong><span id="t_warehouseQty" style="font-weight:700; color:#8b5cf6;">-</span></div>
+                    <div><i class="fa-solid fa-store" style="color:#3b82f6; margin-right:5px;"></i><strong>Boutique : </strong><span id="t_shopQty" style="font-weight:700; color:#3b82f6;">-</span></div>
+                </div>
+            </div>
+            <div class="form-group" style="display:flex; gap:1rem;">
+                <div style="flex:1;">
+                    <label>QuantitÃ© Ã  prÃ©lever</label>
+                    <input type="number" id="t_quantity" required min="1" value="1">
+                </div>
+            </div>
+            <div class="form-group">
+                <label><i class="fa-solid fa-user" style="color:var(--primary); margin-right:5px;"></i>Personne dÃ©lÃ©guÃ©e (coursier / employÃ©)</label>
+                <input type="text" id="t_delegate" placeholder="Ex: Jean-Pierre, Vendeur Salle A" required>
+            </div>
+            <div class="form-group">
+                <label>Raison / Note</label>
+                <input type="text" id="t_reason" placeholder="Ex: RÃ©approvisionnement urgent boutique">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeModal('transferModal')">Annuler</button>
+                <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #8b5cf6, #3b82f6);">
+                    <i class="fa-solid fa-truck-fast"></i> Valider le PrÃ©lÃ¨vement
+                </button>
             </div>
         </form>
     </div>
@@ -89,138 +143,166 @@
 
 @section Scripts {
     <script>
-        async function openMovementModal() {
-            document.getElementById('movementForm').reset();
-            const select = document.getElementById('m_product');
-            select.innerHTML = '<option disabled>Chargement...</option>';
-            document.getElementById('movementModal').classList.add('show');
-            
-            try {
-                const token = localStorage.getItem("jwtToken");
-                const resp = await fetch('/api/products?pageNumber=1&pageSize=100', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if(resp.ok) {
-                    const result = await resp.json();
-                    const products = result.items || result;
-                    select.innerHTML = products.map(p => 
-                        `<option value="${p.id}">[${p.sku || 'N/A'}] ${p.name} (Stock: ${p.currentStock} | ${p.isActive ? 'Actif' : 'Inactif'})</option>`
-                    ).join('');
-                }
-            } catch(e) {
-                console.error("Impossible de charger les produits");
-            }
+        let allProducts = [];
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
         }
 
-        function closeMovementModal() {
-            document.getElementById('movementModal').classList.remove('show');
+        async function loadProducts() {
+            const token = localStorage.getItem("jwtToken");
+            const resp = await fetch('/api/products?pageNumber=1&pageSize=200', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (resp.ok) {
+                const result = await resp.json();
+                allProducts = result.items || result;
+            }
+            return allProducts;
+        }
+
+        async function openMovementModal() {
+            document.getElementById('movementForm').reset();
+            document.getElementById('m_stockInfo').textContent = '';
+            document.getElementById('movementModal').classList.add('show');
+            const products = await loadProducts();
+            const sel = document.getElementById('m_product');
+            sel.innerHTML = products.map(p =>
+                `<option value="${p.id}" data-shop="${p.shopStock}" data-warehouse="${p.warehouseStock}">[${p.sku || 'N/A'}] ${p.name}</option>`
+            ).join('');
+            sel.addEventListener('change', () => {
+                const opt = sel.selectedOptions[0];
+                document.getElementById('m_stockInfo').textContent =
+                    `Boutique: ${opt.dataset.shop} | Magasin: ${opt.dataset.warehouse}`;
+            });
+            if (sel.options.length) sel.dispatchEvent(new Event('change'));
+        }
+
+        async function openTransferModal() {
+            document.getElementById('transferForm').reset();
+            document.getElementById('t_stockInfo').style.display = 'none';
+            document.getElementById('transferModal').classList.add('show');
+            const products = await loadProducts();
+            const sel = document.getElementById('t_product');
+            sel.innerHTML = `<option disabled selected>-- SÃ©lectionner un produit --</option>` +
+                products.map(p =>
+                    `<option value="${p.id}" data-shop="${p.shopStock}" data-warehouse="${p.warehouseStock}">[${p.sku || 'N/A'}] ${p.name}</option>`
+                ).join('');
+        }
+
+        function onTransferProductChange(sel) {
+            const opt = sel.selectedOptions[0];
+            if (!opt || !opt.dataset.warehouse) return;
+            document.getElementById('t_warehouseQty').textContent = opt.dataset.warehouse;
+            document.getElementById('t_shopQty').textContent = opt.dataset.shop;
+            document.getElementById('t_stockInfo').style.display = 'block';
         }
 
         async function saveMovement(e) {
             e.preventDefault();
             const token = localStorage.getItem("jwtToken");
-            if (!token) return;
-
-            const productId = parseInt(document.getElementById('m_product').value);
-            const type = document.getElementById('m_type').value;
-            const quantity = parseInt(document.getElementById('m_quantity').value);
-            const reason = document.getElementById('m_reason').value;
-
-            const requestBody = {
-                productId: productId,
-                type: type === 'In' ? 0 : (type === 'Out' ? 1 : 2), // Assuming enum: 0=In, 1=Out, 2=Adjustment
-                quantity: quantity,
-                reason: reason,
-                reference: ""
+            const body = {
+                productId: parseInt(document.getElementById('m_product').value),
+                type: parseInt(document.getElementById('m_type').value),
+                quantity: parseInt(document.getElementById('m_quantity').value),
+                reason: document.getElementById('m_reason').value || null,
+                reference: document.getElementById('m_reference').value || null
             };
-
             try {
                 const resp = await fetch('/api/stockMovements', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(requestBody)
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(body)
                 });
-
-                if (!resp.ok) throw new Error(await resp.text());
-                
-                closeMovementModal();
-                showToast('Mouvement de stock enregistré', 'success');
+                if (!resp.ok) { const err = await resp.json(); throw new Error(err.message || 'Erreur'); }
+                closeModal('movementModal');
+                showToast('Mouvement enregistrÃ© avec succÃ¨s', 'success');
                 loadMovements();
-            } catch (error) {
-                console.error(error);
-                showToast("Erreur: " + error.message, "danger");
+            } catch (err) {
+                showToast('Erreur: ' + err.message, 'danger');
             }
         }
 
-        function viewMovementDetails() {
-            showToast('Détails du mouvement', 'success');
+        async function saveTransfer(e) {
+            e.preventDefault();
+            const token = localStorage.getItem("jwtToken");
+            const body = {
+                productId: parseInt(document.getElementById('t_product').value),
+                type: 2, // TransfertBoutique
+                quantity: parseInt(document.getElementById('t_quantity').value),
+                reason: document.getElementById('t_reason').value || 'PrÃ©lÃ¨vement boutique',
+                delegatePerson: document.getElementById('t_delegate').value
+            };
+            try {
+                const resp = await fetch('/api/stockMovements', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(body)
+                });
+                if (!resp.ok) { const err = await resp.json(); throw new Error(err.message || 'Erreur'); }
+                closeModal('transferModal');
+                showToast('PrÃ©lÃ¨vement validÃ© : stock boutique mis Ã  jour', 'success');
+                loadMovements();
+            } catch (err) {
+                showToast('Erreur: ' + err.message, 'danger');
+            }
         }
 
         async function loadMovements() {
             const token = localStorage.getItem("jwtToken");
-            if (!token) {
-                window.location.href = "/Login";
-                return;
-            }
-            
+            if (!token) { window.location.href = "/Login"; return; }
+
             const tbody = document.querySelector('#movementsTable tbody');
             tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color: var(--text-muted); padding: 2rem;">Chargement...</td></tr>';
-            
+
             try {
-                const resp = await fetch('/api/stockMovements?pageNumber=1&pageSize=50', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                const resp = await fetch('/api/stockMovements?pageNumber=1&pageSize=100', {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
-                if (resp.status === 401) {
-                    window.location.href = "/Login";
-                    return;
-                }
+                if (resp.status === 401) { window.location.href = "/Login"; return; }
                 if (!resp.ok) throw new Error('Erreur API');
-                
+
                 const result = await resp.json();
                 const movements = result.items || result;
-                
+
                 if (!movements || movements.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color: var(--text-muted); padding: 2rem;">Aucun mouvement trouvé.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color: var(--text-muted); padding: 2rem;">Aucun mouvement trouvÃ©.</td></tr>';
                     return;
                 }
-                
+
+                const badgeStyle = (type) => {
+                    if (type === 0) return 'background:rgba(34,197,94,0.15); color:var(--success)';
+                    if (type === 1) return 'background:rgba(239,68,68,0.15); color:var(--danger)';
+                    return 'background:rgba(139,92,246,0.15); color:#8b5cf6';
+                };
+                const qtyStyle = (type) => {
+                    if (type === 0) return `color:var(--success); font-weight:700`;
+                    if (type === 1) return `color:var(--danger); font-weight:700`;
+                    return `color:#8b5cf6; font-weight:700`;
+                };
+                const qtyPrefix = (type) => type === 0 ? '+' : (type === 1 ? '-' : 'â‡’');
+
                 tbody.innerHTML = movements.map(m => `
                     <tr>
-                        <td>${new Date(m.movedAt).toLocaleString()}</td>
+                        <td style="font-size:0.85rem;">${new Date(m.movedAt).toLocaleString('fr-FR')}</td>
+                        <td><span class="badge" style="${badgeStyle(m.type)}">${m.typeLabel}</span></td>
+                        <td style="font-weight:500;">${m.productName || '#' + m.productId}</td>
+                        <td style="${qtyStyle(m.type)}">${qtyPrefix(m.type)}${m.quantity}</td>
+                        <td style="font-weight:500;">${m.stockAfterMovement}</td>
                         <td>
-                            <span class="badge" style="background: ${m.type === 'In' ? 'rgba(34, 197, 94, 0.2)' : (m.type === 'Out' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)')}; color: ${m.type === 'In' ? 'var(--success)' : (m.type === 'Out' ? 'var(--danger)' : 'var(--secondary)')};">
-                                ${m.type === 'In' ? 'Entrée' : (m.type === 'Out' ? 'Sortie' : 'Ajustement')}
-                            </span>
+                            <div style="font-size:0.9rem;">${m.reason || '-'}</div>
+                            <div style="font-size:0.78rem; color:var(--text-muted);">${m.reference || ''}</div>
                         </td>
-                        <td style="font-weight: 500;">${m.productName || 'Produit #'+m.productId}</td>
-                        <td style="font-weight: 600; color: ${m.type === 'In' ? 'var(--success)' : (m.type === 'Out' ? 'var(--danger)' : 'var(--text-primary)')};">
-                            ${m.type === 'In' ? '+' : (m.type === 'Out' ? '-' : '')}${m.quantity}
-                        </td>
-                        <td style="font-weight: 500; color: var(--text-primary);">
-                            ${m.stockAfterMovement}
-                        </td>
-                        <td>
-                            <div style="font-size: 0.9rem;">${m.reason || '-'}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">${m.reference || ''}</div>
-                        </td>
-                        <td><i class="fa-solid fa-user-circle" style="color: var(--text-muted); margin-right: 5px;"></i> ${m.userName || 'Utilisateur #'+m.userId}</td>
-                        <td>
-                            <button class="btn-icon" title="Détails" style="color: var(--primary);" onclick="viewMovementDetails()"><i class="fa-solid fa-circle-info"></i></button>
-                        </td>
+                        <td>${m.delegatePerson ? `<span style="background:rgba(139,92,246,0.1); color:#8b5cf6; border-radius:5px; padding:2px 8px; font-size:0.85rem;"><i class='fa-solid fa-person-walking' style='margin-right:4px;'></i>${m.delegatePerson}</span>` : '<span style="color:var(--text-muted);">-</span>'}</td>
+                        <td style="font-size:0.85rem;"><i class="fa-solid fa-user-circle" style="color:var(--text-muted); margin-right:4px;"></i>${m.userFullName || '#' + m.userId}</td>
                     </tr>
                 `).join('');
-                
             } catch (e) {
                 console.error(e);
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color: var(--danger); padding: 2rem;">Erreur lors du chargement des données.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color:var(--danger); padding:2rem;">Erreur lors du chargement.</td></tr>';
             }
         }
-        
+
         document.addEventListener('DOMContentLoaded', loadMovements);
     </script>
 }

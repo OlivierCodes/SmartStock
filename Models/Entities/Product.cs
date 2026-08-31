@@ -41,8 +41,25 @@ public class Product
         set => RetailPrice = value;
     }
 
-    /// <summary>Quantité actuellement disponible en stock.</summary>
-    public int CurrentStock { get; set; } = 0;
+    /// <summary>Stock disponible en boutique (en rayon pour la vente)</summary>
+    public int ShopStock { get; set; } = 0;
+
+    /// <summary>Stock disponible en magasin (entrepôt / réserve)</summary>
+    public int WarehouseStock { get; set; } = 0;
+
+    /// <summary>Quantité totale disponible en stock (Boutique + Magasin).</summary>
+    public int CurrentStock
+    {
+        get => ShopStock + WarehouseStock;
+        set
+        {
+            // Pour la rétro-compatibilité / initialisation
+            if (ShopStock == 0 && WarehouseStock == 0)
+            {
+                ShopStock = value;
+            }
+        }
+    }
 
     /// <summary>Seuil minimum déclenchant une alerte de stock faible.</summary>
     public int MinStockThreshold { get; set; } = 5;

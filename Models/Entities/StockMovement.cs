@@ -27,6 +27,10 @@ public class StockMovement
     [MaxLength(200)]
     public string? Reference { get; set; }
 
+    /// <summary>Personne déléguée pour prélever / transporter le stock (coursier, vendeur, etc.)</summary>
+    [MaxLength(200)]
+    public string? DelegatePerson { get; set; }
+
     public DateTime MovedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation
@@ -36,6 +40,7 @@ public class StockMovement
 
 public enum MovementType
 {
-    Entree = 0,   // Réapprovisionnement
-    Sortie = 1    // Retrait du stock
+    Entree = 0,             // Réapprovisionnement Magasin (+)
+    Sortie = 1,             // Retrait / Décharge / Perte (-)
+    TransfertBoutique = 2   // Transfert / Prélèvement (Magasin -> Boutique)
 }

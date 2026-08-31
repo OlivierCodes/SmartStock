@@ -94,9 +94,6 @@ namespace SmartStock.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("CurrentStock")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
@@ -131,6 +128,9 @@ namespace SmartStock.Migrations
                     b.Property<decimal>("SellingPrice")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("ShopStock")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Unit")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -138,6 +138,9 @@ namespace SmartStock.Migrations
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("WarehouseStock")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -233,6 +236,10 @@ namespace SmartStock.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("DelegatePerson")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime>("MovedAt")
                         .HasColumnType("timestamp with time zone");

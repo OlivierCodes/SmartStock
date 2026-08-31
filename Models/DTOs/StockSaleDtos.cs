@@ -18,6 +18,7 @@ public record StockMovementDto(
     int StockAfterMovement,
     string? Reason,
     string? Reference,
+    string? DelegatePerson,
     DateTime MovedAt
 );
 
@@ -26,7 +27,8 @@ public record CreateStockMovementRequest(
     [Required] MovementType Type,
     [Required, Range(1, int.MaxValue)] int Quantity,
     [MaxLength(500)] string? Reason,
-    [MaxLength(200)] string? Reference
+    [MaxLength(200)] string? Reference,
+    [MaxLength(200)] string? DelegatePerson
 );
 
 public record StockMovementListParams(

@@ -57,15 +57,34 @@ public class StockService : IStockService
         if (!product.IsActive)
             throw new InvalidOperationException("Ce produit est désactivé.");
 
-        if (request.Type == MovementType.Sortie && product.CurrentStock < request.Quantity)
-            throw new InvalidOperationException(
-                $"Stock insuffisant. Disponible : {product.CurrentStock}, demandé : {request.Quantity}.");
+        switch (request.Type)
+        {
+            case MovementType.Entree:
+                // Les réapprovisionnements fournisseurs entrent en Magasin
+                product.WarehouseStock += request.Quantity;
+                break;
 
-        // Mettre à jour le stock
-        if (request.Type == MovementType.Entree)
-            product.CurrentStock += request.Quantity;
-        else
-            product.CurrentStock -= request.Quantity;
+            case MovementType.Sortie:
+                // La sortie est déduite en priorité de la Boutique, puis du Magasin
+                int totalStock = product.ShopStock + product.WarehouseStock;
+                if (totalStock < request.Quantity)
+                    throw new InvalidOperationException(
+                        $"Stock insuffisant. Total disponible : {totalStock} (Boutique: {product.ShopStock} + Magasin: {product.WarehouseStock}), demandé : {request.Quantity}.");
+                int fromShop = Math.Min(product.ShopStock, request.Quantity);
+                int fromWarehouse = request.Quantity - fromShop;
+                product.ShopStock -= fromShop;
+                product.WarehouseStock -= fromWarehouse;
+                break;
+
+            case MovementType.TransfertBoutique:
+                // Prélèvement depuis le Magasin vers la Boutique
+                if (product.WarehouseStock < request.Quantity)
+                    throw new InvalidOperationException(
+                        $"Stock magasin insuffisant. Disponible en magasin : {product.WarehouseStock}, demandé : {request.Quantity}.");
+                product.WarehouseStock -= request.Quantity;
+                product.ShopStock += request.Quantity;
+                break;
+        }
 
         product.UpdatedAt = DateTime.UtcNow;
 
@@ -77,7 +96,8 @@ public class StockService : IStockService
             Quantity = request.Quantity,
             StockAfterMovement = product.CurrentStock,
             Reason = request.Reason,
-            Reference = request.Reference
+            Reference = request.Reference,
+            DelegatePerson = request.DelegatePerson
         };
 
         _context.StockMovements.Add(movement);
@@ -129,11 +149,18 @@ public class StockService : IStockService
         sm.UserId,
         $"{sm.User?.FirstName} {sm.User?.LastName}",
         sm.Type,
-        sm.Type == MovementType.Entree ? "Entrée" : "Sortie",
+        sm.Type switch
+        {
+            MovementType.Entree => "Entrée Magasin",
+            MovementType.Sortie => "Sortie",
+            MovementType.TransfertBoutique => "Transfert → Boutique",
+            _ => sm.Type.ToString()
+        },
         sm.Quantity,
         sm.StockAfterMovement,
         sm.Reason,
         sm.Reference,
+        sm.DelegatePerson,
         sm.MovedAt
     );
 }
@@ -189,9 +216,10 @@ public class SaleService : ISaleService
             var product = products.FirstOrDefault(p => p.Id == item.ProductId)
                 ?? throw new KeyNotFoundException($"Produit {item.ProductId} introuvable ou inactif.");
 
-            if (product.CurrentStock < item.Quantity)
+            var totalAvailable = product.ShopStock + product.WarehouseStock;
+            if (totalAvailable < item.Quantity)
                 throw new InvalidOperationException(
-                    $"Stock insuffisant pour '{product.Name}'. Disponible : {product.CurrentStock}.");
+                    $"Stock insuffisant pour '{product.Name}'. Boutique: {product.ShopStock} + Magasin: {product.WarehouseStock} = {totalAvailable} disponible.");
         }
 
         var saleNumber = GenerateSaleNumber();
@@ -201,14 +229,17 @@ public class SaleService : ISaleService
         foreach (var itemReq in request.Items)
         {
             var product = products.First(p => p.Id == itemReq.ProductId);
-            var unitPrice = itemReq.UnitPrice.HasValue && itemReq.UnitPrice.Value >= 0 
-                ? itemReq.UnitPrice.Value 
+            var unitPrice = itemReq.UnitPrice.HasValue && itemReq.UnitPrice.Value >= 0
+                ? itemReq.UnitPrice.Value
                 : product.RetailPrice;
             var lineTotal = unitPrice * itemReq.Quantity;
             total += lineTotal;
 
-            // Déduire du stock
-            product.CurrentStock -= itemReq.Quantity;
+            // Déduire en priorité du Stock Boutique, puis du Stock Magasin
+            int fromShop = Math.Min(product.ShopStock, itemReq.Quantity);
+            int fromWarehouse = itemReq.Quantity - fromShop;
+            product.ShopStock -= fromShop;
+            product.WarehouseStock -= fromWarehouse;
             product.UpdatedAt = DateTime.UtcNow;
 
             saleItems.Add(new SaleItem
