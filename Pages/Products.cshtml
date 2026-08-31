@@ -278,6 +278,35 @@
             }
         }
         
-        document.addEventListener('DOMContentLoaded', loadProducts);
+        async function loadCategoryOptions(selectedId = null) {
+            const token = localStorage.getItem("jwtToken");
+            if (!token) return;
+            try {
+                const resp = await fetch('/api/categories', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (resp.ok) {
+                    const categories = await resp.json();
+                    const select = document.getElementById('p_category');
+                    if (categories && categories.length > 0) {
+                        select.innerHTML = categories.map(c => 
+                            `<option value="${c.id ?? c.Id}">${c.name ?? c.Name}</option>`
+                        ).join('');
+                        if (selectedId) {
+                            select.value = selectedId;
+                        }
+                    }
+                }
+            } catch(e) {
+                console.error("Erreur chargement catégories pour le formulaire", e);
+            }
+        }
+
+        async function initPage() {
+            await loadCategoryOptions();
+            await loadProducts();
+        }
+        
+        document.addEventListener('DOMContentLoaded', initPage);
     </script>
 }

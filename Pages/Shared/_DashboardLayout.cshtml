@@ -62,6 +62,12 @@
                         <span>Produits</span>
                     </a>
                 </li>
+                <li class="nav-item @(currentRoute.StartsWith("/Categories") ? "active" : "")">
+                    <a href="/Categories" class="nav-link">
+                        <i class="fa-solid fa-tags"></i>
+                        <span>Catégories</span>
+                    </a>
+                </li>
                 <li class="nav-item @(currentRoute.StartsWith("/Sales") ? "active" : "")">
                     <a href="/Sales" class="nav-link">
                         <i class="fa-solid fa-cart-shopping"></i>
