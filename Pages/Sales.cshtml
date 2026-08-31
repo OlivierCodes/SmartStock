@@ -59,6 +59,12 @@
                 
                 <div class="form-group">
                     <label>Ajouter un Produit</label>
+                    <div style="margin-bottom: 0.5rem;">
+                        <div style="position: relative;">
+                            <input type="text" id="s_product_search" placeholder="🔍 Rechercher par nom ou SKU..." oninput="filterProductDropdown()" style="width: 100%; padding-left: 2rem;">
+                            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"></i>
+                        </div>
+                    </div>
                     <div style="display: flex; gap: 0.5rem; align-items: flex-start;">
                         <div style="flex: 1;">
                             <select id="s_product_select">
@@ -177,8 +183,46 @@
         let cartItems = [];
         let allProducts = [];
 
+        function renderProductOptions(productsToRender, selectedId = null) {
+            const select = document.getElementById('s_product_select');
+            if (!productsToRender || productsToRender.length === 0) {
+                select.innerHTML = '<option disabled selected value="">Aucun produit correspondant</option>';
+                return;
+            }
+
+            select.innerHTML = '<option disabled selected value="">Sélectionner un produit...</option>' + productsToRender.map(p => 
+                `<option value="${p.id ?? p.Id}" data-price="${p.sellingPrice ?? p.SellingPrice}">[${p.sku || p.sKU || p.SKU || 'N/A'}] ${p.name || p.Name} - ${(p.sellingPrice ?? p.SellingPrice).toFixed(2)} FCFA (Stock: ${p.currentStock ?? p.CurrentStock})</option>`
+            ).join('');
+
+            if (selectedId) {
+                select.value = selectedId;
+            } else if (productsToRender.length === 1) {
+                // Auto-select if single match found
+                select.value = productsToRender[0].id ?? productsToRender[0].Id;
+            }
+        }
+
+        function filterProductDropdown() {
+            const query = (document.getElementById('s_product_search').value || '').trim().toLowerCase();
+            if (!query) {
+                renderProductOptions(allProducts);
+                return;
+            }
+
+            const filtered = allProducts.filter(p => {
+                const name = (p.name || p.Name || '').toLowerCase();
+                const sku = (p.sku || p.sKU || p.SKU || '').toLowerCase();
+                const cat = (p.categoryName || p.CategoryName || '').toLowerCase();
+                return name.includes(query) || sku.includes(query) || cat.includes(query);
+            });
+
+            renderProductOptions(filtered);
+        }
+
         async function openSaleModal() {
             document.getElementById('saleForm').reset();
+            const searchInput = document.getElementById('s_product_search');
+            if (searchInput) searchInput.value = '';
             cartItems = [];
             updateCartUI();
             const select = document.getElementById('s_product_select');
@@ -187,15 +231,13 @@
             
             try {
                 const token = localStorage.getItem("jwtToken");
-                const resp = await fetch('/api/products?pageNumber=1&pageSize=100', {
+                const resp = await fetch('/api/products?pageNumber=1&pageSize=500', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if(resp.ok) {
                     const result = await resp.json();
                     allProducts = result.items || result;
-                    select.innerHTML = '<option disabled selected value="">Sélectionner un produit...</option>' + allProducts.map(p => 
-                        `<option value="${p.id ?? p.Id}" data-price="${p.sellingPrice ?? p.SellingPrice}">[${p.sku || p.sKU || p.SKU || 'N/A'}] ${p.name || p.Name} - ${(p.sellingPrice ?? p.SellingPrice).toFixed(2)} FCFA (Stock: ${p.currentStock ?? p.CurrentStock})</option>`
-                    ).join('');
+                    renderProductOptions(allProducts);
                 }
             } catch(e) {
                 console.error("Impossible de charger les produits");
