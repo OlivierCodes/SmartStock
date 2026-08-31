@@ -64,11 +64,12 @@
                 </div>
                 <div style="flex: 1;">
                     <label>Catégorie</label>
+                    <div style="position: relative; margin-bottom: 0.35rem;">
+                        <input type="text" id="p_category_search" placeholder="🔍 Filtrer catégorie..." oninput="filterCategoryOptionsInModal()" style="padding-left: 1.8rem; font-size: 0.85rem; padding-top: 0.35rem; padding-bottom: 0.35rem;">
+                        <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 0.6rem; top: 50%; transform: translateY(-50%); font-size: 0.75rem; color: var(--text-muted); pointer-events: none;"></i>
+                    </div>
                     <select id="p_category">
                         <option value="1">Alimentation</option>
-                        <option value="2">Boissons</option>
-                        <option value="3">Hygiène</option>
-                        <option value="4">Électronique</option>
                     </select>
                 </div>
             </div>
@@ -96,8 +97,50 @@
 
 @section Scripts {
     <script>
-        function openProductModal(id = null, name = '', sku = '', categoryId = 1, price = 0, minStock = 5, currentStock = 0) {
+        let allProductCategories = [];
+
+        function renderCategorySelectOptions(categoriesToRender, selectedId = null) {
+            const select = document.getElementById('p_category');
+            if (!categoriesToRender || categoriesToRender.length === 0) {
+                select.innerHTML = '<option disabled selected value="">Aucune catégorie trouvée</option>';
+                return;
+            }
+
+            select.innerHTML = categoriesToRender.map(c => 
+                `<option value="${c.id ?? c.Id}">${c.name ?? c.Name}</option>`
+            ).join('');
+
+            if (selectedId) {
+                select.value = selectedId;
+            } else if (categoriesToRender.length === 1) {
+                select.value = categoriesToRender[0].id ?? categoriesToRender[0].Id;
+            }
+        }
+
+        function filterCategoryOptionsInModal() {
+            const query = (document.getElementById('p_category_search').value || '').trim().toLowerCase();
+            const currentSelected = document.getElementById('p_category').value;
+            if (!query) {
+                renderCategorySelectOptions(allProductCategories, currentSelected);
+                return;
+            }
+
+            const filtered = allProductCategories.filter(c => {
+                const name = (c.name ?? c.Name ?? '').toLowerCase();
+                const desc = (c.description ?? c.Description ?? '').toLowerCase();
+                return name.includes(query) || desc.includes(query);
+            });
+
+            renderCategorySelectOptions(filtered, currentSelected);
+        }
+
+        function openProductModal(id = null, name = '', sku = '', categoryId = null, price = 0, minStock = 5, currentStock = 0) {
             document.getElementById('productForm').reset();
+            const searchCategoryInput = document.getElementById('p_category_search');
+            if (searchCategoryInput) searchCategoryInput.value = '';
+            
+            renderCategorySelectOptions(allProductCategories, categoryId);
+
             const isEdit = id !== null;
             document.getElementById('productModalTitle').innerText = isEdit ? 'Modifier le Produit' : 'Nouveau Produit';
             
@@ -105,7 +148,7 @@
                 document.getElementById('p_id').value = id;
                 document.getElementById('p_name').value = name;
                 document.getElementById('p_sku').value = sku;
-                document.getElementById('p_category').value = categoryId || 1;
+                if (categoryId) document.getElementById('p_category').value = categoryId;
                 document.getElementById('p_price').value = price;
                 document.getElementById('p_minstock').value = minStock;
                 document.getElementById('p_stock').value = currentStock;
@@ -286,16 +329,8 @@
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (resp.ok) {
-                    const categories = await resp.json();
-                    const select = document.getElementById('p_category');
-                    if (categories && categories.length > 0) {
-                        select.innerHTML = categories.map(c => 
-                            `<option value="${c.id ?? c.Id}">${c.name ?? c.Name}</option>`
-                        ).join('');
-                        if (selectedId) {
-                            select.value = selectedId;
-                        }
-                    }
+                    allProductCategories = await resp.json() || [];
+                    renderCategorySelectOptions(allProductCategories, selectedId);
                 }
             } catch(e) {
                 console.error("Erreur chargement catégories pour le formulaire", e);
