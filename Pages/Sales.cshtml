@@ -128,47 +128,47 @@
 
 <!-- Hidden Receipt Container for Printing -->
 <div id="print-receipt-container" style="display: none;">
-    <div class="receipt" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000; max-width: 350px; margin: 0 auto; padding: 20px; background: #fff; line-height: 1.4;">
+    <div class="receipt" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #000; max-width: 380px; margin: 0 auto; padding: 24px; background: #fff; line-height: 1.5;">
         
         <div style="text-align: center; margin-bottom: 20px;">
-            <img id="r_shop_logo" src="" style="display:none; max-width: 100px; max-height: 100px; margin: 0 auto 10px; border-radius: 8px;">
-            <h2 id="r_shop_name" style="margin: 0; font-size: 22px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">SMART STOCK</h2>
-            <p style="margin: 5px 0 0; font-size: 14px; color: #555;">Ticket de Caisse</p>
+            <img id="r_shop_logo" src="" style="display:none; max-width: 120px; max-height: 120px; margin: 0 auto 12px; border-radius: 8px;">
+            <h2 id="r_shop_name" style="margin: 0; font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #000;">SMART STOCK</h2>
+            <p style="margin: 6px 0 0; font-size: 16px; font-weight: 600; color: #333; text-transform: uppercase; letter-spacing: 0.5px;">Ticket de Caisse</p>
         </div>
         
-        <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 10px 0; margin-bottom: 15px; font-size: 13px;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr><td style="padding: 2px 0;"><strong>Date:</strong></td><td style="text-align: right;" id="r_date"></td></tr>
-                <tr><td style="padding: 2px 0;"><strong>Vente N°:</strong></td><td style="text-align: right;" id="r_number"></td></tr>
-                <tr><td style="padding: 2px 0;"><strong>Vendeur:</strong></td><td style="text-align: right;" id="r_seller"></td></tr>
-                <tr id="r_customer_p" style="display: none;"><td style="padding: 2px 0;"><strong>Client:</strong></td><td style="text-align: right;" id="r_customer"></td></tr>
+        <div style="border-top: 2px dashed #000; border-bottom: 2px dashed #000; padding: 12px 0; margin-bottom: 18px; font-size: 15px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+                <tr><td style="padding: 4px 0; font-weight: bold; width: 35%;">Date :</td><td style="text-align: right; font-weight: 500;" id="r_date"></td></tr>
+                <tr><td style="padding: 4px 0; font-weight: bold;">Ticket N° :</td><td style="text-align: right; font-weight: bold; font-family: monospace; font-size: 16px;" id="r_number"></td></tr>
+                <tr><td style="padding: 4px 0; font-weight: bold;">Vendeur :</td><td style="text-align: right; font-weight: 500;" id="r_seller"></td></tr>
+                <tr id="r_customer_p" style="display: none;"><td style="padding: 4px 0; font-weight: bold;">Client :</td><td style="text-align: right; font-weight: bold;" id="r_customer"></td></tr>
             </table>
         </div>
         
-        <table style="width: 100%; font-size: 13px; border-collapse: collapse; margin-bottom: 15px;">
+        <table style="width: 100%; font-size: 15px; border-collapse: collapse; margin-bottom: 18px;">
             <thead>
-                <tr style="border-bottom: 1px solid #000;">
-                    <th style="text-align: left; padding: 5px 0;">Article</th>
-                    <th style="text-align: center; padding: 5px 0;">Qté</th>
-                    <th style="text-align: right; padding: 5px 0;">Montant</th>
+                <tr style="border-bottom: 2px solid #000; font-size: 15px;">
+                    <th style="text-align: left; padding: 8px 0; font-weight: bold;">Article</th>
+                    <th style="text-align: center; padding: 8px 0; font-weight: bold; width: 60px;">Qté</th>
+                    <th style="text-align: right; padding: 8px 0; font-weight: bold; width: 110px;">Montant</th>
                 </tr>
             </thead>
             <tbody id="r_items">
             </tbody>
         </table>
         
-        <div style="border-top: 2px solid #000; padding-top: 10px; margin-bottom: 25px;">
-            <table style="width: 100%; font-size: 16px; font-weight: bold;">
+        <div style="border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 12px 0; margin-bottom: 25px;">
+            <table style="width: 100%; font-size: 20px; font-weight: 800;">
                 <tr>
-                    <td style="text-transform: uppercase;">Total</td>
+                    <td style="text-transform: uppercase; letter-spacing: 0.5px;">TOTAL NET</td>
                     <td style="text-align: right;"><span id="r_total"></span> FCFA</td>
                 </tr>
             </table>
         </div>
         
-        <div style="text-align: center; font-size: 12px; color: #444;">
-            <p style="margin: 0 0 5px; font-weight: bold;">Merci de votre visite !</p>
-            <p style="margin: 0; font-style: italic;">À très bientôt.</p>
+        <div style="text-align: center; font-size: 14px; color: #111; line-height: 1.6;">
+            <p style="margin: 0 0 4px; font-weight: bold; font-size: 15px;">Merci de votre confiance !</p>
+            <p style="margin: 0; font-style: italic;">À très bientôt chez SMART STOCK</p>
         </div>
         
     </div>
@@ -190,6 +190,7 @@
         width: 100%;
         margin: 0;
         padding: 0;
+        background: #fff;
     }
 }
 </style>
@@ -479,9 +480,9 @@
             const items = sale.items || sale.Items || [];
             document.getElementById('r_items').innerHTML = items.map(i => `
                 <tr>
-                    <td style="padding: 6px 0; border-bottom: 1px solid #eee;">${i.productName || i.ProductName}</td>
-                    <td style="text-align: center; padding: 6px 0; border-bottom: 1px solid #eee;">${i.quantity || i.Quantity}</td>
-                    <td style="text-align: right; padding: 6px 0; border-bottom: 1px solid #eee;">${(i.totalPrice || i.TotalPrice).toFixed(2)}</td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: 600; font-size: 15px; color: #000;">${i.productName || i.ProductName}</td>
+                    <td style="text-align: center; padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: bold; font-size: 15px; color: #000;">${i.quantity || i.Quantity}</td>
+                    <td style="text-align: right; padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: bold; font-size: 15px; color: #000;">${(i.totalPrice || i.TotalPrice).toFixed(2)}</td>
                 </tr>
             `).join('');
             

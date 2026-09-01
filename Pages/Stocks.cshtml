@@ -121,64 +121,64 @@
 
 <!-- Conteneur d'impression du bon de prélèvement (masqué, activé par window.print()) -->
 <div id="print-transfer-container" style="display: none;">
-    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000; max-width: 420px; margin: 0 auto; padding: 20px; background: #fff; line-height: 1.5;">
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #000; max-width: 480px; margin: 0 auto; padding: 24px; background: #fff; line-height: 1.5;">
 
-        <div style="text-align: center; margin-bottom: 16px;">
-            <h2 id="tr_shop_name" style="margin: 0; font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">SMART STOCK</h2>
-            <p style="margin: 4px 0 0; font-size: 13px; color: #555;">BON DE PRÉLÈVEMENT — TRANSFERT INTERNE</p>
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h2 id="tr_shop_name" style="margin: 0; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #000;">SMART STOCK</h2>
+            <p style="margin: 6px 0 0; font-size: 15px; font-weight: bold; color: #333; text-transform: uppercase; letter-spacing: 0.5px;">BON DE PRÉLÈVEMENT — TRANSFERT INTERNE</p>
         </div>
 
-        <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 8px 0; margin-bottom: 12px; font-size: 12px;">
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr><td style="padding: 2px 0;"><strong>N° Bon :</strong></td><td style="text-align: right;" id="tr_bon_number"></td></tr>
-                <tr><td style="padding: 2px 0;"><strong>Date :</strong></td><td style="text-align: right;" id="tr_date"></td></tr>
-                <tr><td style="padding: 2px 0;"><strong>Émis par :</strong></td><td style="text-align: right;" id="tr_user"></td></tr>
+        <div style="border-top: 2px dashed #000; border-bottom: 2px dashed #000; padding: 12px 0; margin-bottom: 16px; font-size: 14px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <tr><td style="padding: 3px 0; font-weight: bold; width: 35%;">N° Bon :</td><td style="text-align: right; font-weight: bold; font-family: monospace; font-size: 16px;" id="tr_bon_number"></td></tr>
+                <tr><td style="padding: 3px 0; font-weight: bold;">Date & Heure :</td><td style="text-align: right; font-weight: 500;" id="tr_date"></td></tr>
+                <tr><td style="padding: 3px 0; font-weight: bold;">Émis par :</td><td style="text-align: right; font-weight: 600;" id="tr_user"></td></tr>
             </table>
         </div>
 
-        <div style="display: flex; gap: 0; margin-bottom: 12px; font-size: 12px;">
-            <div style="flex: 1; padding: 8px; border: 1px solid #ccc; border-right: none;">
-                <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #555; margin-bottom: 4px;">Provenance</div>
-                <div style="font-weight: bold;">Magasin (Réserve)</div>
+        <div style="display: flex; gap: 0; margin-bottom: 16px; font-size: 14px;">
+            <div style="flex: 1; padding: 10px; border: 2px solid #000; border-right: none; background: #fafafa;">
+                <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #555; margin-bottom: 4px;">Provenance</div>
+                <div style="font-weight: 800; font-size: 15px;">Magasin (Réserve)</div>
             </div>
-            <div style="flex: 1; padding: 8px; border: 1px solid #ccc;">
-                <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #555; margin-bottom: 4px;">Destination</div>
-                <div style="font-weight: bold;">Boutique (Rayon)</div>
+            <div style="flex: 1; padding: 10px; border: 2px solid #000; background: #fafafa;">
+                <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #555; margin-bottom: 4px;">Destination</div>
+                <div style="font-weight: 800; font-size: 15px;">Boutique (Rayon)</div>
             </div>
         </div>
 
-        <div style="margin-bottom: 12px; padding: 8px; border: 1px solid #ccc; font-size: 12px;">
-            <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #555; margin-bottom: 4px;">Personne Déléguée (Coursier)</div>
-            <div id="tr_delegate" style="font-size: 14px; font-weight: bold;"></div>
+        <div style="margin-bottom: 16px; padding: 10px; border: 2px solid #000; font-size: 14px; background: #fafafa;">
+            <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #555; margin-bottom: 4px;">Personne Déléguée (Coursier)</div>
+            <div id="tr_delegate" style="font-size: 16px; font-weight: 800; color: #000;"></div>
         </div>
 
-        <table style="width: 100%; font-size: 12px; border-collapse: collapse; margin-bottom: 14px;">
+        <table style="width: 100%; font-size: 14px; border-collapse: collapse; margin-bottom: 18px;">
             <thead>
-                <tr style="border-bottom: 2px solid #000;">
-                    <th style="text-align: left; padding: 5px 0;">SKU</th>
-                    <th style="text-align: left; padding: 5px 0;">Désignation</th>
-                    <th style="text-align: right; padding: 5px 0;">Qté Prélevée</th>
+                <tr style="border-bottom: 2px solid #000; font-size: 14px;">
+                    <th style="text-align: left; padding: 8px 0; font-weight: bold; width: 25%;">SKU</th>
+                    <th style="text-align: left; padding: 8px 0; font-weight: bold;">Désignation</th>
+                    <th style="text-align: right; padding: 8px 0; font-weight: bold; width: 25%;">Qté Prélevée</th>
                 </tr>
             </thead>
             <tbody id="tr_items"></tbody>
         </table>
 
-        <div style="border-top: 1px dashed #000; margin-bottom: 14px; padding-top: 8px; font-size: 12px;" id="tr_reason_block"></div>
+        <div style="border-top: 2px dashed #000; margin-bottom: 16px; padding-top: 10px; font-size: 14px;" id="tr_reason_block"></div>
 
-        <div style="display: flex; gap: 0; margin-top: 20px; font-size: 11px;">
-            <div style="flex: 1; border: 1px solid #ccc; border-right: none; padding: 8px; min-height: 55px;">
-                <div style="font-weight: bold; margin-bottom: 4px;">Signature Magasinier</div>
+        <div style="display: flex; gap: 0; margin-top: 24px; font-size: 12px;">
+            <div style="flex: 1; border: 1px solid #000; border-right: none; padding: 10px; min-height: 65px;">
+                <div style="font-weight: bold; font-size: 12px; margin-bottom: 4px;">Signature Magasinier</div>
             </div>
-            <div style="flex: 1; border: 1px solid #ccc; border-right: none; padding: 8px; min-height: 55px;">
-                <div style="font-weight: bold; margin-bottom: 4px;">Signature Délégué</div>
+            <div style="flex: 1; border: 1px solid #000; border-right: none; padding: 10px; min-height: 65px;">
+                <div style="font-weight: bold; font-size: 12px; margin-bottom: 4px;">Signature Délégué</div>
             </div>
-            <div style="flex: 1; border: 1px solid #ccc; padding: 8px; min-height: 55px;">
-                <div style="font-weight: bold; margin-bottom: 4px;">Signature Réception Boutique</div>
+            <div style="flex: 1; border: 1px solid #000; padding: 10px; min-height: 65px;">
+                <div style="font-weight: bold; font-size: 12px; margin-bottom: 4px;">Signature Réception</div>
             </div>
         </div>
 
-        <div style="text-align: center; font-size: 10px; color: #888; margin-top: 16px;">
-            <p style="margin: 0;">Document officiel de décharge interne — SmartStock</p>
+        <div style="text-align: center; font-size: 12px; color: #444; margin-top: 20px;">
+            <p style="margin: 0; font-style: italic;">Document officiel de décharge interne — SMART STOCK</p>
         </div>
     </div>
 </div>
@@ -192,6 +192,7 @@
         position: absolute;
         left: 0; top: 0;
         width: 100%; margin: 0; padding: 0;
+        background: #fff;
     }
 }
 </style>
@@ -434,9 +435,9 @@
 
                 document.getElementById('tr_items').innerHTML = `
                     <tr>
-                        <td style="padding: 6px 0; border-bottom: 1px solid #eee; font-family: monospace;">${pSku}</td>
-                        <td style="padding: 6px 0; border-bottom: 1px solid #eee;">${pName}</td>
-                        <td style="text-align: right; padding: 6px 0; border-bottom: 1px solid #eee; font-weight: bold;">${pQty}</td>
+                        <td style="padding: 8px 0; border-bottom: 1px solid #ddd; font-family: monospace; font-size: 14px; font-weight: bold; color: #000;">${pSku}</td>
+                        <td style="padding: 8px 0; border-bottom: 1px solid #ddd; font-size: 15px; font-weight: 600; color: #000;">${pName}</td>
+                        <td style="text-align: right; padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: 800; font-size: 16px; color: #000;">${pQty}</td>
                     </tr>
                 `;
 
