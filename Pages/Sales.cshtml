@@ -140,6 +140,12 @@
                     </table>
                 </div>
 
+                <!-- Alerte Décharge / Retrait Magasin -->
+                <div id="withdrawalWarning" style="display: none; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #f59e0b;">
+                    <i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px; font-size: 1rem;"></i>
+                    <strong>Information Prélèvement :</strong> Le stock rayon boutique étant insuffisant pour certains articles, un <strong>Bon de Retrait Magasin</strong> sera automatiquement généré pour vous permettre de récupérer les articles manquants en réserve.
+                </div>
+
                 <div class="form-group" style="text-align: right;">
                     <label>Montant Total (FCFA)</label>
                     <input type="number" step="0.01" id="s_total" readonly value="0.00" style="text-align: right; font-weight: bold; background: var(--bg-card); color: var(--text-primary);">
@@ -202,6 +208,56 @@
     </div>
 </div>
 
+<!-- Conteneur d'impression du Bon de Retrait Magasin (affiché si prélèvement magasin nécessaire) -->
+<div id="print-withdrawal-container" style="display: none;">
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #000; max-width: 480px; margin: 0 auto; padding: 24px; background: #fff; line-height: 1.5;">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h2 id="w_shop_name" style="margin: 0; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #000;">SMART STOCK</h2>
+            <p style="margin: 6px 0 0; font-size: 15px; font-weight: bold; color: #b91c1c; text-transform: uppercase; letter-spacing: 0.5px;">BON DE RETRAIT MAGASIN (RÉSERVE)</p>
+            <p style="margin: 3px 0 0; font-size: 12px; color: #555;">À présenter au magasinier pour décharge suite à la vente</p>
+        </div>
+        <div style="border-top: 2px dashed #000; border-bottom: 2px dashed #000; padding: 12px 0; margin-bottom: 16px; font-size: 14px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <tr><td style="padding: 3px 0; font-weight: bold; width: 38%;">Vente Rattachée :</td><td style="text-align: right; font-weight: bold; font-family: monospace; font-size: 16px;" id="w_sale_number"></td></tr>
+                <tr><td style="padding: 3px 0; font-weight: bold;">Date & Heure :</td><td style="text-align: right; font-weight: 500;" id="w_date"></td></tr>
+                <tr><td style="padding: 3px 0; font-weight: bold;">Vendeur / Émetteur :</td><td style="text-align: right; font-weight: 600;" id="w_seller"></td></tr>
+                <tr id="w_customer_p" style="display: none;"><td style="padding: 3px 0; font-weight: bold;">Client :</td><td style="text-align: right; font-weight: bold;" id="w_customer"></td></tr>
+            </table>
+        </div>
+        <div style="background: rgba(239, 68, 68, 0.08); border: 2px solid #ef4444; padding: 10px; border-radius: 6px; margin-bottom: 16px; font-size: 13px;">
+            <i class="fa-solid fa-triangle-exclamation" style="color: #dc2626; margin-right: 6px;"></i>
+            <strong>Articles à retirer immédiatement au magasin :</strong>
+        </div>
+        <table style="width: 100%; font-size: 14px; border-collapse: collapse; margin-bottom: 18px;">
+            <thead>
+                <tr style="border-bottom: 2px solid #000; font-size: 14px;">
+                    <th style="text-align: left; padding: 8px 0; font-weight: bold; width: 25%;">SKU</th>
+                    <th style="text-align: left; padding: 8px 0; font-weight: bold;">Désignation</th>
+                    <th style="text-align: right; padding: 8px 0; font-weight: bold; width: 25%;">Qté à Retirer</th>
+                </tr>
+            </thead>
+            <tbody id="w_items"></tbody>
+        </table>
+        <div style="display: flex; gap: 0; margin-top: 24px; font-size: 12px;">
+            <div style="flex: 1; border: 1px solid #000; border-right: none; padding: 10px; min-height: 65px;">
+                <div style="font-weight: bold; font-size: 12px; margin-bottom: 4px;">Signature Magasinier</div>
+                <div style="font-size: 10px; color: #666;">(Sortie de réserve)</div>
+            </div>
+            <div style="flex: 1; border: 1px solid #000; border-right: none; padding: 10px; min-height: 65px;">
+                <div style="font-weight: bold; font-size: 12px; margin-bottom: 4px;">Signature Vendeur</div>
+                <div style="font-size: 10px; color: #666;">(Demandeur)</div>
+            </div>
+            <div style="flex: 1; border: 1px solid #000; padding: 10px; min-height: 65px;">
+                <div style="font-weight: bold; font-size: 12px; margin-bottom: 4px;">Signature / Décharge Client</div>
+                <div style="font-size: 10px; color: #666;">(Réception article)</div>
+            </div>
+        </div>
+        <div style="text-align: center; font-size: 12px; color: #444; margin-top: 20px;">
+            <p style="margin: 0; font-style: italic;">Bon de retrait officiel pour régularisation de stock — SMART STOCK</p>
+        </div>
+    </div>
+</div>
+
 <style>
 @@media print {
     body * {
@@ -210,7 +266,20 @@
     #print-receipt-container, #print-receipt-container * {
         visibility: visible;
     }
+    #print-withdrawal-container, #print-withdrawal-container * {
+        visibility: visible;
+    }
     #print-receipt-container {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: #fff;
+    }
+    #print-withdrawal-container {
         display: block !important;
         position: absolute;
         left: 0;
@@ -354,18 +423,37 @@
             const product = allProducts.find(p => (p.id ?? p.Id) === productId);
             if (!product) return;
 
+            const shop = product.shopStock ?? product.ShopStock ?? 0;
+            const warehouse = product.warehouseStock ?? product.WarehouseStock ?? 0;
+            const totalAvailable = shop + warehouse;
+
+            if (qty > totalAvailable) {
+                showToast(`Stock insuffisant pour "${product.name || product.Name}". Boutique: ${shop} + Magasin: ${warehouse} = ${totalAvailable} disponible.`, "danger");
+                return;
+            }
+
             const priceTypeLabel = priceTypeSelect.options[priceTypeSelect.selectedIndex].text;
+            const sku = product.sku || product.sKU || product.SKU || 'N/A';
             
+            // Calculer quelle portion vient du magasin (réserve)
+            const fromShop = Math.min(shop, qty);
+            const fromWarehouse = qty - fromShop;
+
             const existingIndex = cartItems.findIndex(i => i.productId === productId && i.price === unitPrice);
             if (existingIndex !== -1) {
                 cartItems[existingIndex].quantity += qty;
+                cartItems[existingIndex].fromWarehouse = (cartItems[existingIndex].fromWarehouse || 0) + fromWarehouse;
             } else {
                 cartItems.push({
                     productId: productId,
                     name: product.name || product.Name,
+                    sku: sku,
                     priceType: priceTypeLabel,
                     price: unitPrice,
-                    quantity: qty
+                    quantity: qty,
+                    shopStock: shop,
+                    warehouseStock: warehouse,
+                    fromWarehouse: fromWarehouse   // quantité à prélever en réserve magasin
                 });
             }
             
@@ -386,20 +474,33 @@
         function updateCartUI() {
             const tbody = document.getElementById('cartTableBody');
             const totalInput = document.getElementById('s_total');
+            const warningBox = document.getElementById('withdrawalWarning');
             
             if (cartItems.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="color: var(--text-muted); padding: 1rem;">Le panier est vide.</td></tr>';
                 totalInput.value = "0.00";
+                if (warningBox) warningBox.style.display = 'none';
                 return;
             }
             
             let total = 0;
+            let needsWarehouseWithdrawal = false;
+
             tbody.innerHTML = cartItems.map((item, idx) => {
                 const lineTotal = item.price * item.quantity;
                 total += lineTotal;
+                const fromWh = item.fromWarehouse || 0;
+                if (fromWh > 0) needsWarehouseWithdrawal = true;
+                
+                const stockBadge = fromWh > 0
+                    ? `<span class="badge" style="background: rgba(245,158,11,0.2); color: #f59e0b; font-size: 0.7rem; margin-left: 4px;" title="${fromWh} unité(s) depuis la réserve magasin">
+                           <i class="fa-solid fa-warehouse"></i> +${fromWh} mag.
+                       </span>`
+                    : '';
+
                 return `
                     <tr>
-                        <td>${item.name}</td>
+                        <td>${item.name}${stockBadge}</td>
                         <td><span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-size: 0.75rem;">${item.priceType || 'Détaillant'}</span></td>
                         <td>${item.price.toFixed(2)} FCFA</td>
                         <td>${item.quantity}</td>
@@ -410,6 +511,11 @@
             }).join('');
             
             totalInput.value = total.toFixed(2);
+
+            // Afficher ou masquer l'avertissement de prélèvement magasin
+            if (warningBox) {
+                warningBox.style.display = needsWarehouseWithdrawal ? 'block' : 'none';
+            }
         }
 
         function closeSaleModal() {
@@ -433,6 +539,15 @@
                 quantity: i.quantity,
                 unitPrice: i.price
             }));
+
+            // Identifier les articles nécessitant un retrait du magasin
+            const warehouseItems = cartItems
+                .filter(i => (i.fromWarehouse || 0) > 0)
+                .map(i => ({
+                    name: i.name,
+                    sku: i.sku || 'N/A',
+                    fromWarehouse: i.fromWarehouse
+                }));
 
             const requestBody = {
                 customerName: customerName,
@@ -466,13 +581,56 @@
                 showToast('Vente enregistrée avec succès', 'success');
                 loadSales();
                 
-                // Print receipt automatically
-                printReceipt(saleData);
+                // Imprimer le reçu de vente en premier
+                await printReceipt(saleData);
+
+                // Si certains articles venaient du stock magasin, imprimer le bon de retrait
+                if (warehouseItems.length > 0) {
+                    setTimeout(() => {
+                        printWithdrawalSlip(saleData, warehouseItems);
+                    }, 800);
+                }
                 
             } catch (error) {
                 console.error(error);
                 showToast("Erreur: " + error.message, "danger");
             }
+        }
+
+        async function printWithdrawalSlip(sale, warehouseItems) {
+            try {
+                const resp = await fetch('/api/settings');
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data.shopName) {
+                        document.getElementById('w_shop_name').innerText = data.shopName;
+                    }
+                }
+            } catch (e) { /* ignore */ }
+
+            document.getElementById('w_sale_number').innerText = sale.saleNumber || sale.SaleNumber || '—';
+            document.getElementById('w_date').innerText = new Date(sale.soldAt || sale.SoldAt || Date.now()).toLocaleString('fr-FR');
+            document.getElementById('w_seller').innerText = sale.sellerName || sale.SellerName || '—';
+
+            const customer = sale.customerName || sale.CustomerName;
+            if (customer) {
+                document.getElementById('w_customer_p').style.display = 'table-row';
+                document.getElementById('w_customer').innerText = customer;
+            } else {
+                document.getElementById('w_customer_p').style.display = 'none';
+            }
+
+            document.getElementById('w_items').innerHTML = warehouseItems.map(item => `
+                <tr>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: 600; font-size: 14px; color: #000;">${item.sku}</td>
+                    <td style="padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: 600; font-size: 14px; color: #000;">${item.name}</td>
+                    <td style="text-align: right; padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: 800; font-size: 16px; color: #dc2626;">${item.fromWarehouse}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('print-withdrawal-container').style.display = 'block';
+            window.print();
+            document.getElementById('print-withdrawal-container').style.display = 'none';
         }
         
         async function printReceipt(sale) {
