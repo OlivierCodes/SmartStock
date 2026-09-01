@@ -33,10 +33,9 @@ public class StockService : IStockService
             .OrderByDescending(sm => sm.MovedAt)
             .Skip((p.Page - 1) * p.PageSize)
             .Take(p.PageSize)
-            .Select(sm => MapToDto(sm))
             .ToListAsync();
 
-        return new PagedResult<StockMovementDto>(items, total, p.Page, p.PageSize);
+        return new PagedResult<StockMovementDto>(items.Select(MapToDto), total, p.Page, p.PageSize);
     }
 
     public async Task<StockMovementDto> GetMovementByIdAsync(int id)
@@ -289,7 +288,7 @@ public class SaleService : ISaleService
             var product = await _context.Products.FindAsync(item.ProductId);
             if (product is not null)
             {
-                product.CurrentStock += item.Quantity;
+                product.ShopStock += item.Quantity;
                 product.UpdatedAt = DateTime.UtcNow;
             }
         }
@@ -367,10 +366,10 @@ public class DashboardService : IDashboardService
 
         var totalProducts = await _context.Products.CountAsync(p => p.IsActive);
         var lowStock = await _context.Products
-            .Where(p => p.IsActive && p.CurrentStock <= p.MinStockThreshold && p.CurrentStock > 0)
+            .Where(p => p.IsActive && (p.ShopStock + p.WarehouseStock) <= p.MinStockThreshold && (p.ShopStock + p.WarehouseStock) > 0)
             .CountAsync();
         var outOfStock = await _context.Products
-            .Where(p => p.IsActive && p.CurrentStock == 0)
+            .Where(p => p.IsActive && (p.ShopStock + p.WarehouseStock) == 0)
             .CountAsync();
 
         var todaySales = await _context.Sales
@@ -388,12 +387,12 @@ public class DashboardService : IDashboardService
         var topProducts = await _context.SaleItems
             .Include(i => i.Product)
             .Where(i => i.Sale.Status == SaleStatus.Completed && i.Sale.SoldAt >= monthStart)
-            .GroupBy(i => new { i.ProductId, i.Product.Name, i.Product.SKU, i.Product.CurrentStock, i.Product.IsActive })
+            .GroupBy(i => new { i.ProductId, i.Product.Name, i.Product.SKU, i.Product.ShopStock, i.Product.WarehouseStock, i.Product.IsActive })
             .Select(g => new TopProductDto {
                 ProductId = g.Key.ProductId,
                 Name = g.Key.Name,
                 SKU = g.Key.SKU,
-                CurrentStock = g.Key.CurrentStock,
+                CurrentStock = g.Key.ShopStock + g.Key.WarehouseStock,
                 IsActive = g.Key.IsActive,
                 SoldQuantity = g.Sum(i => i.Quantity),
                 TotalRevenue = g.Sum(i => i.TotalPrice)
@@ -403,14 +402,14 @@ public class DashboardService : IDashboardService
             .ToListAsync();
 
         var lowStockAlerts = await _context.Products
-            .Where(p => p.IsActive && p.CurrentStock <= p.MinStockThreshold)
-            .OrderBy(p => p.CurrentStock)
+            .Where(p => p.IsActive && (p.ShopStock + p.WarehouseStock) <= p.MinStockThreshold)
+            .OrderBy(p => p.ShopStock + p.WarehouseStock)
             .Take(10)
             .Select(p => new LowStockAlertDto {
                 ProductId = p.Id,
                 Name = p.Name,
                 SKU = p.SKU,
-                CurrentStock = p.CurrentStock,
+                CurrentStock = p.ShopStock + p.WarehouseStock,
                 MinStockThreshold = p.MinStockThreshold,
                 IsActive = p.IsActive
             })

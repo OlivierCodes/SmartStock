@@ -14,11 +14,11 @@ public class CategoryService : ICategoryService
 
     public async Task<IEnumerable<CategoryDto>> GetAllAsync()
     {
-        return await _context.Categories
+        var categories = await _context.Categories
             .Include(c => c.Products)
             .OrderBy(c => c.Name)
-            .Select(c => MapToDto(c, c.Products.Count))
             .ToListAsync();
+        return categories.Select(c => MapToDto(c, c.Products.Count));
     }
 
     public async Task<CategoryDto> GetByIdAsync(int id)
@@ -86,7 +86,7 @@ public class ProductService : IProductService
             query = query.Where(x => x.CategoryId == p.CategoryId);
 
         if (p.LowStockOnly == true)
-            query = query.Where(x => x.CurrentStock <= x.MinStockThreshold);
+            query = query.Where(x => (x.ShopStock + x.WarehouseStock) <= x.MinStockThreshold);
 
         if (p.ActiveOnly != false)
             query = query.Where(x => x.IsActive);
@@ -96,10 +96,9 @@ public class ProductService : IProductService
             .OrderBy(x => x.Name)
             .Skip((p.Page - 1) * p.PageSize)
             .Take(p.PageSize)
-            .Select(x => MapToDto(x))
             .ToListAsync();
 
-        return new PagedResult<ProductDto>(items, total, p.Page, p.PageSize);
+        return new PagedResult<ProductDto>(items.Select(MapToDto), total, p.Page, p.PageSize);
     }
 
     public async Task<ProductDto> GetByIdAsync(int id)
@@ -202,12 +201,12 @@ public class ProductService : IProductService
 
     public async Task<IEnumerable<ProductDto>> GetLowStockAsync()
     {
-        return await _context.Products
+        var products = await _context.Products
             .Include(p => p.Category)
             .Where(p => p.IsActive && (p.ShopStock + p.WarehouseStock) <= p.MinStockThreshold)
             .OrderBy(p => p.ShopStock + p.WarehouseStock)
-            .Select(p => MapToDto(p))
             .ToListAsync();
+        return products.Select(MapToDto);
     }
 
     internal static ProductDto MapToDto(Product p) => new(

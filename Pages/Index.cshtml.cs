@@ -29,7 +29,7 @@ public class IndexModel : PageModel
             TotalProducts = await _context.Products.CountAsync(p => p.IsActive);
             TotalCategories = await _context.Categories.CountAsync();
             TotalUsers = await _context.Users.CountAsync(u => u.IsActive);
-            LowStockAlertsCount = await _context.Products.CountAsync(p => p.IsActive && p.CurrentStock <= p.MinStockThreshold);
+            LowStockAlertsCount = await _context.Products.CountAsync(p => p.IsActive && (p.ShopStock + p.WarehouseStock) <= p.MinStockThreshold);
             IsDatabaseConnected = true;
         }
         catch (Exception ex)
