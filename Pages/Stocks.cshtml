@@ -70,6 +70,11 @@
             </tbody>
         </table>
     </div>
+    <!-- Pagination -->
+    <div class="pagination-container" id="stocksPagination" style="display: none;">
+        <div class="pagination-info" id="stocksPaginationInfo"></div>
+        <div class="pagination-controls" id="stocksPaginationControls"></div>
+    </div>
 </div>
 
 <!-- Modal: Prélèvement Rapide Magasin → Boutique -->
@@ -241,7 +246,7 @@
                     populateCategoryFilter();
                 }
 
-                renderStocksTable(allProducts);
+                filterStocksTable();
 
             } catch (e) {
                 console.error("Erreur loadStocksData:", e);
@@ -253,6 +258,63 @@
             const select = document.getElementById('stock_category_filter');
             select.innerHTML = '<option value="">Toutes les catégories</option>' +
                 allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        let currentStocksPage = 1;
+        const stocksPageSize = 20;
+
+        function changeStocksPage(page) {
+            currentStocksPage = page;
+            filterStocksTable();
+        }
+
+        function renderStocksPagination(page, totalPages, totalCount) {
+            const container = document.getElementById('stocksPagination');
+            const infoEl = document.getElementById('stocksPaginationInfo');
+            const controlsEl = document.getElementById('stocksPaginationControls');
+
+            if (!totalPages || totalPages <= 1) {
+                container.style.display = totalCount > 0 ? 'flex' : 'none';
+                infoEl.innerText = `${totalCount} produit(s) au total`;
+                controlsEl.innerHTML = '';
+                return;
+            }
+
+            container.style.display = 'flex';
+            const from = (page - 1) * stocksPageSize + 1;
+            const to = Math.min(page * stocksPageSize, totalCount);
+            infoEl.innerText = `Affichage de ${from} à ${to} sur ${totalCount} produits`;
+
+            let html = '';
+            // Bouton Précédent
+            html += `<button class="pagination-btn" ${page <= 1 ? 'disabled' : ''} onclick="changeStocksPage(${page - 1})" title="Page précédente"><i class="fa-solid fa-chevron-left"></i></button>`;
+
+            // Numéros de page
+            const maxVisible = 5;
+            let startPage = Math.max(1, page - 2);
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            if (endPage - startPage < maxVisible - 1) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+
+            if (startPage > 1) {
+                html += `<button class="pagination-btn" onclick="changeStocksPage(1)">1</button>`;
+                if (startPage > 2) html += `<span class="pagination-ellipsis">...</span>`;
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="pagination-btn ${i === page ? 'active' : ''}" onclick="changeStocksPage(${i})">${i}</button>`;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span class="pagination-ellipsis">...</span>`;
+                html += `<button class="pagination-btn" onclick="changeStocksPage(${totalPages})">${totalPages}</button>`;
+            }
+
+            // Bouton Suivant
+            html += `<button class="pagination-btn" ${page >= totalPages ? 'disabled' : ''} onclick="changeStocksPage(${page + 1})" title="Page suivante"><i class="fa-solid fa-chevron-right"></i></button>`;
+
+            controlsEl.innerHTML = html;
         }
 
         function filterStocksTable() {
@@ -284,7 +346,17 @@
                 return matchesSearch && matchesCategory && matchesStatus;
             });
 
-            renderStocksTable(filtered);
+            const totalCount = filtered.length;
+            const totalPages = Math.ceil(totalCount / stocksPageSize);
+            if (currentStocksPage > totalPages && totalPages > 0) {
+                currentStocksPage = totalPages;
+            }
+
+            const startIndex = (currentStocksPage - 1) * stocksPageSize;
+            const paginatedItems = filtered.slice(startIndex, startIndex + stocksPageSize);
+
+            renderStocksTable(paginatedItems);
+            renderStocksPagination(currentStocksPage, totalPages, totalCount);
         }
 
         function renderStocksTable(products) {

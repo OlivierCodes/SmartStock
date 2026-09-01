@@ -23,8 +23,28 @@
 <div id="stockSummaryCards" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap:1rem; margin-bottom:1.5rem; display:none;"></div>
 
 <div class="glass-card">
-    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 class="card-title">Historique des Mouvements</h3>
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <h3 class="card-title" style="margin: 0;"><i class="fa-solid fa-clock-rotate-left" style="color: var(--primary); margin-right: 8px;"></i>Historique des Mouvements</h3>
+        
+        <div style="display: flex; gap: 0.6rem; align-items: center; flex: 1; max-width: 750px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.3rem;">
+                <label style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Du</label>
+                <input type="date" id="m_from_date" onchange="onMovementsFilterChange()" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;">
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.3rem;">
+                <label style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Au</label>
+                <input type="date" id="m_to_date" onchange="onMovementsFilterChange()" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;">
+            </div>
+            <div style="min-width: 140px;">
+                <select id="m_type_filter" onchange="onMovementsFilterChange()" style="width: 100%; padding: 0.4rem 0.6rem; font-size: 0.85rem;">
+                    <option value="">Tous les types</option>
+                    <option value="0">Entrées Magasin</option>
+                    <option value="1">Sorties</option>
+                    <option value="2">Transferts Boutique</option>
+                </select>
+            </div>
+        </div>
+
         <button class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="loadMovements()">
             <i class="fa-solid fa-rotate-right"></i> Actualiser
         </button>
@@ -50,6 +70,11 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+    <!-- Pagination -->
+    <div class="pagination-container" id="movementsPagination" style="display: none;">
+        <div class="pagination-info" id="movementsPaginationInfo"></div>
+        <div class="pagination-controls" id="movementsPaginationControls"></div>
     </div>
 </div>
 
@@ -386,6 +411,72 @@
             }
         }
 
+        let currentMovementsPage = 1;
+        const movementsPageSize = 20;
+        let movementsFilterDebounce = null;
+
+        function onMovementsFilterChange() {
+            clearTimeout(movementsFilterDebounce);
+            movementsFilterDebounce = setTimeout(() => {
+                currentMovementsPage = 1;
+                loadMovements();
+            }, 300);
+        }
+
+        function changeMovementsPage(page) {
+            currentMovementsPage = page;
+            loadMovements();
+        }
+
+        function renderMovementsPagination(page, totalPages, totalCount) {
+            const container = document.getElementById('movementsPagination');
+            const infoEl = document.getElementById('movementsPaginationInfo');
+            const controlsEl = document.getElementById('movementsPaginationControls');
+
+            if (!totalPages || totalPages <= 1) {
+                container.style.display = totalCount > 0 ? 'flex' : 'none';
+                infoEl.innerText = `${totalCount} mouvement(s) au total`;
+                controlsEl.innerHTML = '';
+                return;
+            }
+
+            container.style.display = 'flex';
+            const from = (page - 1) * movementsPageSize + 1;
+            const to = Math.min(page * movementsPageSize, totalCount);
+            infoEl.innerText = `Affichage de ${from} à ${to} sur ${totalCount} mouvements`;
+
+            let html = '';
+            // Bouton Précédent
+            html += `<button class="pagination-btn" ${page <= 1 ? 'disabled' : ''} onclick="changeMovementsPage(${page - 1})" title="Page précédente"><i class="fa-solid fa-chevron-left"></i></button>`;
+
+            // Numéros de page avec ellipses
+            const maxVisible = 5;
+            let startPage = Math.max(1, page - 2);
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            if (endPage - startPage < maxVisible - 1) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+
+            if (startPage > 1) {
+                html += `<button class="pagination-btn" onclick="changeMovementsPage(1)">1</button>`;
+                if (startPage > 2) html += `<span class="pagination-ellipsis">...</span>`;
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="pagination-btn ${i === page ? 'active' : ''}" onclick="changeMovementsPage(${i})">${i}</button>`;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span class="pagination-ellipsis">...</span>`;
+                html += `<button class="pagination-btn" onclick="changeMovementsPage(${totalPages})">${totalPages}</button>`;
+            }
+
+            // Bouton Suivant
+            html += `<button class="pagination-btn" ${page >= totalPages ? 'disabled' : ''} onclick="changeMovementsPage(${page + 1})" title="Page suivante"><i class="fa-solid fa-chevron-right"></i></button>`;
+
+            controlsEl.innerHTML = html;
+        }
+
         async function loadMovements() {
             const token = localStorage.getItem("jwtToken");
             if (!token) { window.location.href = "/Login"; return; }
@@ -394,17 +485,33 @@
             tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="color: var(--text-muted); padding: 2rem;">Chargement...</td></tr>';
 
             try {
-                const resp = await fetch('/api/stockMovements?pageNumber=1&pageSize=100', {
+                const params = new URLSearchParams({
+                    page: currentMovementsPage,
+                    pageSize: movementsPageSize
+                });
+
+                const fromDate = document.getElementById('m_from_date')?.value;
+                const toDate = document.getElementById('m_to_date')?.value;
+                const typeFilter = document.getElementById('m_type_filter')?.value;
+
+                if (fromDate) params.append('from', fromDate);
+                if (toDate) params.append('to', toDate);
+                if (typeFilter !== '' && typeFilter !== undefined && typeFilter !== null) params.append('type', typeFilter);
+
+                const resp = await fetch(`/api/stockMovements?${params.toString()}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (resp.status === 401) { window.location.href = "/Login"; return; }
                 if (!resp.ok) throw new Error('Erreur API');
 
                 const result = await resp.json();
-                const movements = result.items || result;
+                const movements = result.items || result || [];
+                const totalCount = result.totalCount ?? movements.length;
+                const totalPages = result.totalPages ?? Math.ceil(totalCount / movementsPageSize);
 
                 if (!movements || movements.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="color: var(--text-muted); padding: 2rem;">Aucun mouvement trouvé.</td></tr>';
+                    renderMovementsPagination(currentMovementsPage, 0, 0);
                     return;
                 }
 
@@ -452,6 +559,9 @@
                     </tr>
                 `;
                 }).join('');
+
+                renderMovementsPagination(currentMovementsPage, totalPages, totalCount);
+
             } catch (e) {
                 console.error(e);
                 tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="color:var(--danger); padding:2rem;">Erreur lors du chargement.</td></tr>';

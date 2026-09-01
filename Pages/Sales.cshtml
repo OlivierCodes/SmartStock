@@ -16,8 +16,31 @@
 </div>
 
 <div class="glass-card">
-    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 class="card-title">Transactions récentes</h3>
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <h3 class="card-title" style="margin: 0;"><i class="fa-solid fa-receipt" style="color: var(--primary); margin-right: 8px;"></i>Transactions & Ventes</h3>
+        
+        <div style="display: flex; gap: 0.6rem; align-items: center; flex: 1; max-width: 750px; flex-wrap: wrap;">
+            <div style="position: relative; flex: 2; min-width: 160px;">
+                <input type="text" id="sales_search" placeholder="🔍 N° Vente, client, vendeur..." oninput="onSalesFilterChange()" style="width: 100%; padding-left: 2rem;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"></i>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.3rem;">
+                <label style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Du</label>
+                <input type="date" id="sales_from_date" onchange="onSalesFilterChange()" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;">
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.3rem;">
+                <label style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Au</label>
+                <input type="date" id="sales_to_date" onchange="onSalesFilterChange()" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;">
+            </div>
+            <div style="min-width: 120px;">
+                <select id="sales_status_filter" onchange="onSalesFilterChange()" style="width: 100%; padding: 0.4rem 0.6rem; font-size: 0.85rem;">
+                    <option value="">Tous statuts</option>
+                    <option value="Completed">Complétée</option>
+                    <option value="Cancelled">Annulée</option>
+                </select>
+            </div>
+        </div>
+
         <button class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="openSaleModal()">
             <i class="fa-solid fa-cart-plus"></i> Nouvelle Vente
         </button>
@@ -40,6 +63,11 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+    <!-- Pagination -->
+    <div class="pagination-container" id="salesPagination" style="display: none;">
+        <div class="pagination-info" id="salesPaginationInfo"></div>
+        <div class="pagination-controls" id="salesPaginationControls"></div>
     </div>
 </div>
 
@@ -538,6 +566,72 @@
             });
         }
 
+        let currentSalesPage = 1;
+        const salesPageSize = 20;
+        let salesFilterDebounce = null;
+
+        function onSalesFilterChange() {
+            clearTimeout(salesFilterDebounce);
+            salesFilterDebounce = setTimeout(() => {
+                currentSalesPage = 1;
+                loadSales();
+            }, 300);
+        }
+
+        function changeSalesPage(page) {
+            currentSalesPage = page;
+            loadSales();
+        }
+
+        function renderSalesPagination(page, totalPages, totalCount) {
+            const container = document.getElementById('salesPagination');
+            const infoEl = document.getElementById('salesPaginationInfo');
+            const controlsEl = document.getElementById('salesPaginationControls');
+
+            if (!totalPages || totalPages <= 1) {
+                container.style.display = totalCount > 0 ? 'flex' : 'none';
+                infoEl.innerText = `${totalCount} transaction(s) au total`;
+                controlsEl.innerHTML = '';
+                return;
+            }
+
+            container.style.display = 'flex';
+            const from = (page - 1) * salesPageSize + 1;
+            const to = Math.min(page * salesPageSize, totalCount);
+            infoEl.innerText = `Affichage de ${from} à ${to} sur ${totalCount} ventes`;
+
+            let html = '';
+            // Bouton Précédent
+            html += `<button class="pagination-btn" ${page <= 1 ? 'disabled' : ''} onclick="changeSalesPage(${page - 1})" title="Page précédente"><i class="fa-solid fa-chevron-left"></i></button>`;
+
+            // Pages numérotées avec ellipses intelligentes
+            const maxVisible = 5;
+            let startPage = Math.max(1, page - 2);
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            if (endPage - startPage < maxVisible - 1) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+
+            if (startPage > 1) {
+                html += `<button class="pagination-btn" onclick="changeSalesPage(1)">1</button>`;
+                if (startPage > 2) html += `<span class="pagination-ellipsis">...</span>`;
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="pagination-btn ${i === page ? 'active' : ''}" onclick="changeSalesPage(${i})">${i}</button>`;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span class="pagination-ellipsis">...</span>`;
+                html += `<button class="pagination-btn" onclick="changeSalesPage(${totalPages})">${totalPages}</button>`;
+            }
+
+            // Bouton Suivant
+            html += `<button class="pagination-btn" ${page >= totalPages ? 'disabled' : ''} onclick="changeSalesPage(${page + 1})" title="Page suivante"><i class="fa-solid fa-chevron-right"></i></button>`;
+
+            controlsEl.innerHTML = html;
+        }
+
         async function loadSales() {
             const token = localStorage.getItem("jwtToken");
             if (!token) {
@@ -549,21 +643,30 @@
             tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="color: var(--text-muted); padding: 2rem;">Chargement...</td></tr>';
             
             try {
-                let fetchUrl = '/api/sales?pageNumber=1&pageSize=50';
-                
-                // Vérifier si l'utilisateur est un vendeur
+                let isVendor = false;
                 try {
                     const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
                     const role = payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-                    if (role === 'Vendeur') {
-                        fetchUrl = '/api/sales/my-sales?pageNumber=1&pageSize=50';
-                    }
+                    if (role === 'Vendeur') isVendor = true;
                 } catch(e) {}
 
-                const resp = await fetch(fetchUrl, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                const baseUrl = isVendor ? '/api/sales/my-sales' : '/api/sales';
+                const params = new URLSearchParams({
+                    page: currentSalesPage,
+                    pageSize: salesPageSize
+                });
+
+                const fromDate = document.getElementById('sales_from_date')?.value;
+                const toDate = document.getElementById('sales_to_date')?.value;
+                const status = document.getElementById('sales_status_filter')?.value;
+                const search = (document.getElementById('sales_search')?.value || '').trim().toLowerCase();
+
+                if (fromDate) params.append('from', fromDate);
+                if (toDate) params.append('to', toDate);
+                if (status) params.append('status', status);
+
+                const resp = await fetch(`${baseUrl}?${params.toString()}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (resp.status === 401) {
                     window.location.href = "/Login";
@@ -572,10 +675,23 @@
                 if (!resp.ok) throw new Error('Erreur API');
                 
                 const result = await resp.json();
-                const sales = result.items || result;
+                let sales = result.items || result || [];
+                const totalCount = result.totalCount ?? sales.length;
+                const totalPages = result.totalPages ?? Math.ceil(totalCount / salesPageSize);
+
+                // Filtrage client supplémentaire si recherche texte présente
+                if (search) {
+                    sales = sales.filter(s => {
+                        const num = (s.saleNumber || '').toLowerCase();
+                        const seller = (s.sellerName || '').toLowerCase();
+                        const client = (s.customerName || '').toLowerCase();
+                        return num.includes(search) || seller.includes(search) || client.includes(search);
+                    });
+                }
                 
                 if (!sales || sales.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="color: var(--text-muted); padding: 2rem;">Aucune vente trouvée.</td></tr>';
+                    renderSalesPagination(currentSalesPage, 0, 0);
                     return;
                 }
                 
@@ -597,6 +713,8 @@
                         </td>
                     </tr>
                 `).join('');
+
+                renderSalesPagination(currentSalesPage, totalPages, totalCount);
                 
             } catch (e) {
                 console.error(e);

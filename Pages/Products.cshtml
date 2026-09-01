@@ -16,8 +16,21 @@
 </div>
 
 <div class="glass-card">
-    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 class="card-title">Liste des Produits</h3>
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <h3 class="card-title" style="margin: 0;"><i class="fa-solid fa-boxes-stacked" style="color: var(--primary); margin-right: 8px;"></i>Liste des Produits</h3>
+        
+        <div style="display: flex; gap: 0.6rem; align-items: center; flex: 1; max-width: 650px; flex-wrap: wrap;">
+            <div style="position: relative; flex: 2; min-width: 180px;">
+                <input type="text" id="prod_search" placeholder="🔍 Rechercher nom, SKU..." oninput="onProductsFilterChange()" style="width: 100%; padding-left: 2rem;">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"></i>
+            </div>
+            <div style="flex: 1; min-width: 160px;">
+                <select id="prod_category_filter" onchange="onProductsFilterChange()" style="width: 100%; padding: 0.4rem 0.6rem; font-size: 0.85rem;">
+                    <option value="">Toutes catégories</option>
+                </select>
+            </div>
+        </div>
+
         <button class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="openProductModal()">
             <i class="fa-solid fa-plus"></i> Nouveau
         </button>
@@ -43,6 +56,11 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+    <!-- Pagination -->
+    <div class="pagination-container" id="productsPagination" style="display: none;">
+        <div class="pagination-info" id="productsPaginationInfo"></div>
+        <div class="pagination-controls" id="productsPaginationControls"></div>
     </div>
 </div>
 
@@ -302,6 +320,72 @@
             });
         }
 
+        let currentProductsPage = 1;
+        const productsPageSize = 20;
+        let productsFilterDebounce = null;
+
+        function onProductsFilterChange() {
+            clearTimeout(productsFilterDebounce);
+            productsFilterDebounce = setTimeout(() => {
+                currentProductsPage = 1;
+                loadProducts();
+            }, 300);
+        }
+
+        function changeProductsPage(page) {
+            currentProductsPage = page;
+            loadProducts();
+        }
+
+        function renderProductsPagination(page, totalPages, totalCount) {
+            const container = document.getElementById('productsPagination');
+            const infoEl = document.getElementById('productsPaginationInfo');
+            const controlsEl = document.getElementById('productsPaginationControls');
+
+            if (!totalPages || totalPages <= 1) {
+                container.style.display = totalCount > 0 ? 'flex' : 'none';
+                infoEl.innerText = `${totalCount} produit(s) au total`;
+                controlsEl.innerHTML = '';
+                return;
+            }
+
+            container.style.display = 'flex';
+            const from = (page - 1) * productsPageSize + 1;
+            const to = Math.min(page * productsPageSize, totalCount);
+            infoEl.innerText = `Affichage de ${from} à ${to} sur ${totalCount} produits`;
+
+            let html = '';
+            // Bouton Précédent
+            html += `<button class="pagination-btn" ${page <= 1 ? 'disabled' : ''} onclick="changeProductsPage(${page - 1})" title="Page précédente"><i class="fa-solid fa-chevron-left"></i></button>`;
+
+            // Numéros de page avec ellipses
+            const maxVisible = 5;
+            let startPage = Math.max(1, page - 2);
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            if (endPage - startPage < maxVisible - 1) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+
+            if (startPage > 1) {
+                html += `<button class="pagination-btn" onclick="changeProductsPage(1)">1</button>`;
+                if (startPage > 2) html += `<span class="pagination-ellipsis">...</span>`;
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="pagination-btn ${i === page ? 'active' : ''}" onclick="changeProductsPage(${i})">${i}</button>`;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span class="pagination-ellipsis">...</span>`;
+                html += `<button class="pagination-btn" onclick="changeProductsPage(${totalPages})">${totalPages}</button>`;
+            }
+
+            // Bouton Suivant
+            html += `<button class="pagination-btn" ${page >= totalPages ? 'disabled' : ''} onclick="changeProductsPage(${page + 1})" title="Page suivante"><i class="fa-solid fa-chevron-right"></i></button>`;
+
+            controlsEl.innerHTML = html;
+        }
+
         async function loadProducts() {
             const token = localStorage.getItem("jwtToken");
             if (!token) {
@@ -310,10 +394,21 @@
             }
             
             const tbody = document.querySelector('#productsTable tbody');
-            tbody.innerHTML = '<tr><td colspan="11" class="text-center" style="color: var(--text-muted); padding: 2rem;">Chargement...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="color: var(--text-muted); padding: 2rem;">Chargement...</td></tr>';
             
             try {
-                const resp = await fetch('/api/products?pageNumber=1&pageSize=50', {
+                const params = new URLSearchParams({
+                    page: currentProductsPage,
+                    pageSize: productsPageSize
+                });
+
+                const search = (document.getElementById('prod_search')?.value || '').trim();
+                const categoryId = document.getElementById('prod_category_filter')?.value;
+
+                if (search) params.append('search', search);
+                if (categoryId) params.append('categoryId', categoryId);
+
+                const resp = await fetch(`/api/products?${params.toString()}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -328,10 +423,13 @@
                 }
                 
                 const result = await resp.json();
-                const products = result.items || result;
+                const products = result.items || result || [];
+                const totalCount = result.totalCount ?? products.length;
+                const totalPages = result.totalPages ?? Math.ceil(totalCount / productsPageSize);
                 
                 if (!products || products.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="color: var(--text-muted); padding: 2rem;">Aucun produit trouvé.</td></tr>';
+                    renderProductsPagination(currentProductsPage, 0, 0);
                     return;
                 }
                 
@@ -369,6 +467,8 @@
                 `;
                 }).join('');
                 
+                renderProductsPagination(currentProductsPage, totalPages, totalCount);
+
             } catch (e) {
                 console.error("Erreur loadProducts:", e);
                 tbody.innerHTML = `<tr><td colspan="9" class="text-center" style="color: var(--danger); padding: 2rem;">Erreur lors du chargement des données (${e.message || 'Erreur inconnue'}).</td></tr>`;
@@ -385,6 +485,13 @@
                 if (resp.ok) {
                     allProductCategories = await resp.json() || [];
                     renderCategorySelectOptions(allProductCategories, selectedId);
+                    
+                    // Remplir aussi le filtre dans la barre du haut
+                    const filterSelect = document.getElementById('prod_category_filter');
+                    if (filterSelect) {
+                        filterSelect.innerHTML = '<option value="">Toutes catégories</option>' +
+                            allProductCategories.map(c => `<option value="${c.id ?? c.Id}">${c.name ?? c.Name}</option>`).join('');
+                    }
                 }
             } catch(e) {
                 console.error("Erreur chargement catégories pour le formulaire", e);
