@@ -309,7 +309,10 @@
                     window.location.href = "/Login";
                     return;
                 }
-                if (!resp.ok) throw new Error('Erreur API');
+                if (!resp.ok) {
+                    const errData = await resp.json().catch(() => null);
+                    throw new Error(errData?.message || `Erreur serveur (${resp.status})`);
+                }
                 
                 const result = await resp.json();
                 const products = result.items || result;
@@ -350,8 +353,8 @@
                 }).join('');
                 
             } catch (e) {
-                console.error(e);
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center" style="color: var(--danger); padding: 2rem;">Erreur lors du chargement des données.</td></tr>';
+                console.error("Erreur loadProducts:", e);
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center" style="color: var(--danger); padding: 2rem;">Erreur lors du chargement des données (${e.message || 'Erreur inconnue'}).</td></tr>`;
             }
         }
         

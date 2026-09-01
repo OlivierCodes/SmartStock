@@ -93,7 +93,10 @@
                     window.location.href = "/Login";
                     return;
                 }
-                if (!resp.ok) throw new Error('Erreur API');
+                if (!resp.ok) {
+                    const errData = await resp.json().catch(() => null);
+                    throw new Error(errData?.message || `Erreur (${resp.status})`);
+                }
                 const data = await resp.json();
                 
                 // Update KPIs
@@ -108,8 +111,8 @@
                 renderLowStock(data.lowStockAlerts);
 
             } catch (e) {
-                console.error(e);
-                alert("Impossible de charger les données du tableau de bord.");
+                console.error("Erreur Dashboard:", e);
+                alert("Impossible de charger les données du tableau de bord: " + (e.message || "Erreur"));
             }
         }
 
