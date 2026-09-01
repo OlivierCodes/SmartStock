@@ -215,11 +215,11 @@ public class StockService : IStockService
                         {
                             table.ColumnsDefinition(columns =>
                             {
-                                columns.ConstantItem(70);
+                                columns.ConstantColumn(70);
                                 columns.RelativeColumn(2);
-                                columns.ConstantItem(80);
-                                columns.ConstantItem(90);
-                                columns.ConstantItem(90);
+                                columns.ConstantColumn(80);
+                                columns.ConstantColumn(90);
+                                columns.ConstantColumn(90);
                             });
 
                             table.Header(header =>
