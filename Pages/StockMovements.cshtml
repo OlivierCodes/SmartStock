@@ -420,7 +420,13 @@
                 };
                 const qtyPrefix = (type) => type === 0 ? '+' : (type === 1 ? '-' : '➔');
 
-                tbody.innerHTML = movements.map(m => `
+                const isTransfer = (type, label) => {
+                    return type === 2 || type === 'TransfertBoutique' || (typeof label === 'string' && label.toLowerCase().includes('transfert'));
+                };
+
+                tbody.innerHTML = movements.map(m => {
+                    const isTr = isTransfer(m.type, m.typeLabel);
+                    return `
                     <tr>
                         <td style="font-size:0.85rem;">${new Date(m.movedAt).toLocaleString('fr-FR')}</td>
                         <td><span class="badge" style="${badgeStyle(m.type)}">${m.typeLabel}</span></td>
@@ -434,17 +440,18 @@
                         <td>${m.delegatePerson ? `<span style="background:rgba(139,92,246,0.1); color:#8b5cf6; border-radius:5px; padding:2px 8px; font-size:0.85rem;"><i class='fa-solid fa-person-walking' style='margin-right:4px;'></i>${m.delegatePerson}</span>` : '<span style="color:var(--text-muted);">-</span>'}</td>
                         <td style="font-size:0.85rem;"><i class="fa-solid fa-user-circle" style="color:var(--text-muted); margin-right:4px;"></i>${m.userFullName || '#' + m.userId}</td>
                         <td style="text-align:center; white-space:nowrap;">
-                            ${m.type === 2 ? `
-                                <button class="btn-icon" title="Réimprimer le ticket de transfert" style="color: #8b5cf6; font-size: 1rem; padding: 4px 6px;" onclick="reprintTransfer(${m.id})">
+                            ${isTr ? `
+                                <button class="btn-icon" title="Réimprimer le ticket de transfert" style="color: #8b5cf6; font-size: 1.1rem; padding: 4px 6px;" onclick="reprintTransfer(${m.id})">
                                     <i class="fa-solid fa-print"></i>
                                 </button>
-                                <button class="btn-icon" title="Télécharger le bon PDF" style="color: var(--danger); font-size: 1rem; padding: 4px 6px; margin-left: 4px;" onclick="downloadTransferReceipt(${m.id}, localStorage.getItem('jwtToken'))">
+                                <button class="btn-icon" title="Télécharger le bon PDF" style="color: var(--danger); font-size: 1.1rem; padding: 4px 6px; margin-left: 4px;" onclick="downloadTransferReceipt(${m.id}, localStorage.getItem('jwtToken'))">
                                     <i class="fa-solid fa-file-pdf"></i>
                                 </button>
                             ` : '<span style="color:var(--text-muted); font-size:0.8rem;">—</span>'}
                         </td>
                     </tr>
-                `).join('');
+                `;
+                }).join('');
             } catch (e) {
                 console.error(e);
                 tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="color:var(--danger); padding:2rem;">Erreur lors du chargement.</td></tr>';
