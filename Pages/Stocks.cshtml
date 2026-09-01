@@ -119,7 +119,84 @@
     </div>
 </div>
 
-@section Scripts {
+<!-- Conteneur d'impression du bon de prélèvement (masqué, activé par window.print()) -->
+<div id="print-transfer-container" style="display: none;">
+    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #000; max-width: 420px; margin: 0 auto; padding: 20px; background: #fff; line-height: 1.5;">
+
+        <div style="text-align: center; margin-bottom: 16px;">
+            <h2 id="tr_shop_name" style="margin: 0; font-size: 20px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">SMART STOCK</h2>
+            <p style="margin: 4px 0 0; font-size: 13px; color: #555;">BON DE PRÉLÈVEMENT — TRANSFERT INTERNE</p>
+        </div>
+
+        <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 8px 0; margin-bottom: 12px; font-size: 12px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr><td style="padding: 2px 0;"><strong>N° Bon :</strong></td><td style="text-align: right;" id="tr_bon_number"></td></tr>
+                <tr><td style="padding: 2px 0;"><strong>Date :</strong></td><td style="text-align: right;" id="tr_date"></td></tr>
+                <tr><td style="padding: 2px 0;"><strong>Émis par :</strong></td><td style="text-align: right;" id="tr_user"></td></tr>
+            </table>
+        </div>
+
+        <div style="display: flex; gap: 0; margin-bottom: 12px; font-size: 12px;">
+            <div style="flex: 1; padding: 8px; border: 1px solid #ccc; border-right: none;">
+                <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #555; margin-bottom: 4px;">Provenance</div>
+                <div style="font-weight: bold;">Magasin (Réserve)</div>
+            </div>
+            <div style="flex: 1; padding: 8px; border: 1px solid #ccc;">
+                <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #555; margin-bottom: 4px;">Destination</div>
+                <div style="font-weight: bold;">Boutique (Rayon)</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 12px; padding: 8px; border: 1px solid #ccc; font-size: 12px;">
+            <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #555; margin-bottom: 4px;">Personne Déléguée (Coursier)</div>
+            <div id="tr_delegate" style="font-size: 14px; font-weight: bold;"></div>
+        </div>
+
+        <table style="width: 100%; font-size: 12px; border-collapse: collapse; margin-bottom: 14px;">
+            <thead>
+                <tr style="border-bottom: 2px solid #000;">
+                    <th style="text-align: left; padding: 5px 0;">SKU</th>
+                    <th style="text-align: left; padding: 5px 0;">Désignation</th>
+                    <th style="text-align: right; padding: 5px 0;">Qté Prélevée</th>
+                </tr>
+            </thead>
+            <tbody id="tr_items"></tbody>
+        </table>
+
+        <div style="border-top: 1px dashed #000; margin-bottom: 14px; padding-top: 8px; font-size: 12px;" id="tr_reason_block"></div>
+
+        <div style="display: flex; gap: 0; margin-top: 20px; font-size: 11px;">
+            <div style="flex: 1; border: 1px solid #ccc; border-right: none; padding: 8px; min-height: 55px;">
+                <div style="font-weight: bold; margin-bottom: 4px;">Signature Magasinier</div>
+            </div>
+            <div style="flex: 1; border: 1px solid #ccc; border-right: none; padding: 8px; min-height: 55px;">
+                <div style="font-weight: bold; margin-bottom: 4px;">Signature Délégué</div>
+            </div>
+            <div style="flex: 1; border: 1px solid #ccc; padding: 8px; min-height: 55px;">
+                <div style="font-weight: bold; margin-bottom: 4px;">Signature Réception Boutique</div>
+            </div>
+        </div>
+
+        <div style="text-align: center; font-size: 10px; color: #888; margin-top: 16px;">
+            <p style="margin: 0;">Document officiel de décharge interne — SmartStock</p>
+        </div>
+    </div>
+</div>
+
+<style>
+@@media print {
+    body * { visibility: hidden; }
+    #print-transfer-container, #print-transfer-container * { visibility: visible; }
+    #print-transfer-container {
+        display: block !important;
+        position: absolute;
+        left: 0; top: 0;
+        width: 100%; margin: 0; padding: 0;
+    }
+}
+</style>
+
+
     <script>
         let allProducts = [];
         let allCategories = [];
@@ -353,32 +430,60 @@
                 showToast('Prélèvement validé ! Génération du bon en cours...', 'success');
                 loadStocksData();
 
-                // Télécharger automatiquement le bon de prélèvement PDF
-                await downloadTransferReceipt(movement.id, token);
+                // Déclencher l'impression du bon de prélèvement
+                await printTransferReceipt(movement);
 
             } catch (err) {
                 showToast('Erreur: ' + err.message, 'danger');
             }
         }
 
-        async function downloadTransferReceipt(movementId, token) {
+        async function printTransferReceipt(movement) {
             try {
-                const pdfResp = await fetch(`/api/stockMovements/${movementId}/transfer-receipt/pdf`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (!pdfResp.ok) throw new Error('Erreur génération PDF');
-                const blob = await pdfResp.blob();
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Bon_Prelevement_${String(movementId).padStart(4, '0')}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                URL.revokeObjectURL(url);
-                showToast('Bon de prélèvement téléchargé !', 'success');
+                try {
+                    const resp = await fetch('/api/settings');
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        if (data.shopName) {
+                            document.getElementById('tr_shop_name').innerText = data.shopName;
+                        }
+                    }
+                } catch (e) { console.error('Settings load failed for transfer receipt', e); }
+
+                const bonId = movement.id ? String(movement.id).padStart(4, '0') : 'N/A';
+                document.getElementById('tr_bon_number').innerText = `BP-${bonId}`;
+                document.getElementById('tr_date').innerText = new Date(movement.createdAt || new Date()).toLocaleString();
+                document.getElementById('tr_user').innerText = movement.createdByName || 'Gestionnaire';
+                document.getElementById('tr_delegate').innerText = movement.delegatePerson || document.getElementById('t_delegate')?.value || 'N/A';
+
+                const pName = movement.productName || 'Article';
+                const pSku = movement.productSku || '-';
+                const pQty = movement.quantity || 1;
+
+                document.getElementById('tr_items').innerHTML = `
+                    <tr>
+                        <td style="padding: 6px 0; border-bottom: 1px solid #eee; font-family: monospace;">${pSku}</td>
+                        <td style="padding: 6px 0; border-bottom: 1px solid #eee;">${pName}</td>
+                        <td style="text-align: right; padding: 6px 0; border-bottom: 1px solid #eee; font-weight: bold;">${pQty}</td>
+                    </tr>
+                `;
+
+                const reason = movement.reason || document.getElementById('t_reason')?.value || '';
+                const reasonBlock = document.getElementById('tr_reason_block');
+                if (reason) {
+                    reasonBlock.style.display = 'block';
+                    reasonBlock.innerHTML = `<strong>Motif / Note :</strong> ${reason}`;
+                } else {
+                    reasonBlock.style.display = 'none';
+                }
+
+                document.getElementById('print-transfer-container').style.display = 'block';
+                window.print();
+                document.getElementById('print-transfer-container').style.display = 'none';
+
             } catch (err) {
-                showToast('Transfert validé, mais erreur PDF : ' + err.message, 'warning');
+                console.error('Erreur impression :', err);
+                showToast('Erreur lors de l\'impression du bon : ' + err.message, 'warning');
             }
         }
 
