@@ -210,7 +210,9 @@
                 const retail = p.retailPrice ?? p.RetailPrice ?? p.sellingPrice ?? p.SellingPrice ?? 0;
                 const medium = p.mediumPrice ?? p.MediumPrice ?? retail;
                 const last = p.lastPrice ?? p.LastPrice ?? medium;
-                return `<option value="${p.id ?? p.Id}" data-retail="${retail}" data-medium="${medium}" data-last="${last}">[${p.sku || p.sKU || p.SKU || 'N/A'}] ${p.name || p.Name} - Détaillant: ${retail.toFixed(2)} / Moyen: ${medium.toFixed(2)} / Dernier: ${last.toFixed(2)} FCFA (Stock: ${p.currentStock ?? p.CurrentStock})</option>`;
+                const shop = p.shopStock ?? p.ShopStock ?? 0;
+                const warehouse = p.warehouseStock ?? p.WarehouseStock ?? 0;
+                return `<option value="${p.id ?? p.Id}" data-retail="${retail}" data-medium="${medium}" data-last="${last}" data-shop="${shop}" data-warehouse="${warehouse}">[${p.sku || p.sKU || p.SKU || 'N/A'}] ${p.name || p.Name} (Boutique: ${shop} | Magasin: ${warehouse}) - Détaillant: ${retail.toFixed(2)} FCFA</option>`;
             }).join('');
 
             if (selectedId) {
