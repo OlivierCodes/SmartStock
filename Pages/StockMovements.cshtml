@@ -41,11 +41,12 @@
                     <th>Raison / Référence</th>
                     <th>Délégué</th>
                     <th>Utilisateur</th>
+                    <th style="text-align: center;">Bon</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td colspan="8" class="text-center" style="color: var(--text-muted); padding: 2rem;">Chargement...</td>
+                    <td colspan="9" class="text-center" style="color: var(--text-muted); padding: 2rem;">Chargement...</td>
                 </tr>
             </tbody>
         </table>
@@ -240,11 +241,35 @@
                     body: JSON.stringify(body)
                 });
                 if (!resp.ok) { const err = await resp.json(); throw new Error(err.message || 'Erreur'); }
+                const movement = await resp.json();
                 closeModal('transferModal');
-                showToast('Prélèvement validé : stock boutique mis à jour', 'success');
+                showToast('Prélèvement validé ! Génération du bon en cours...', 'success');
                 loadMovements();
+                // Télécharger le bon de prélèvement PDF
+                await downloadTransferReceipt(movement.id, token);
             } catch (err) {
                 showToast('Erreur: ' + err.message, 'danger');
+            }
+        }
+
+        async function downloadTransferReceipt(movementId, token) {
+            try {
+                const pdfResp = await fetch(`/api/stockMovements/${movementId}/transfer-receipt/pdf`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!pdfResp.ok) throw new Error('Erreur génération PDF');
+                const blob = await pdfResp.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Bon_Prelevement_${String(movementId).padStart(4, '0')}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                showToast('Bon de prélèvement téléchargé !', 'success');
+            } catch (err) {
+                showToast('Transfert validé, mais erreur PDF : ' + err.message, 'warning');
             }
         }
 
@@ -295,11 +320,16 @@
                         </td>
                         <td>${m.delegatePerson ? `<span style="background:rgba(139,92,246,0.1); color:#8b5cf6; border-radius:5px; padding:2px 8px; font-size:0.85rem;"><i class='fa-solid fa-person-walking' style='margin-right:4px;'></i>${m.delegatePerson}</span>` : '<span style="color:var(--text-muted);">-</span>'}</td>
                         <td style="font-size:0.85rem;"><i class="fa-solid fa-user-circle" style="color:var(--text-muted); margin-right:4px;"></i>${m.userFullName || '#' + m.userId}</td>
+                        <td style="text-align:center;">
+                            ${m.type === 2 ? `<button class="btn-secondary" style="padding:0.3rem 0.65rem; font-size:0.78rem; border-radius:6px;" title="Télécharger le bon de prélèvement" onclick="downloadTransferReceipt(${m.id}, localStorage.getItem('jwtToken'))">
+                                <i class="fa-solid fa-file-pdf" style="color:var(--danger);"></i> Bon
+                            </button>` : '<span style="color:var(--text-muted); font-size:0.8rem;">—</span>'}
+                        </td>
                     </tr>
                 `).join('');
             } catch (e) {
                 console.error(e);
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color:var(--danger); padding:2rem;">Erreur lors du chargement.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center" style="color:var(--danger); padding:2rem;">Erreur lors du chargement.</td></tr>';
             }
         }
 

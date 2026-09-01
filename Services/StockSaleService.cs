@@ -140,6 +140,155 @@ public class StockService : IStockService
         );
     }
 
+    public async Task<byte[]> GenerateTransferReceiptPdfAsync(int movementId)
+    {
+        var movement = await _context.StockMovements
+            .Include(sm => sm.Product)
+            .Include(sm => sm.User)
+            .FirstOrDefaultAsync(sm => sm.Id == movementId)
+            ?? throw new KeyNotFoundException($"Mouvement {movementId} introuvable.");
+
+        var product = movement.Product;
+        var user = movement.User;
+
+        var document = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A5.Landscape());
+                page.Margin(1.2f, Unit.Centimetre);
+                page.PageColor(Colors.White);
+                page.DefaultTextStyle(x => x.FontSize(9.5f));
+
+                page.Header().Element(ComposeHeader);
+                page.Content().Element(ComposeContent);
+                page.Footer().Element(ComposeFooter);
+
+                void ComposeHeader(IContainer container)
+                {
+                    container.Row(row =>
+                    {
+                        row.RelativeItem().Column(col =>
+                        {
+                            col.Item().Text("SMARTSTOCK").FontSize(18).Bold().FontColor(Colors.Blue.Darken2);
+                            col.Item().Text("BON DE PRÉLÈVEMENT & TRANSFERT INTERNE").FontSize(11).Bold().FontColor(Colors.Grey.Darken3);
+                        });
+
+                        row.ConstantItem(180).AlignRight().Column(col =>
+                        {
+                            col.Item().Text($"BON N° : BON-TR-{movement.Id:D4}").FontSize(11).Bold().FontColor(Colors.Purple.Darken2);
+                            col.Item().Text($"Date : {movement.MovedAt:dd/MM/yyyy HH:mm} UTC").FontSize(9).FontColor(Colors.Grey.Medium);
+                        });
+                    });
+                }
+
+                void ComposeContent(IContainer container)
+                {
+                    container.PaddingVertical(0.5f, Unit.Centimetre).Column(column =>
+                    {
+                        column.Spacing(10);
+
+                        // Informations Emplacements & Délégué
+                        column.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(1);
+                            });
+
+                            table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(col =>
+                            {
+                                col.Item().Text("PROVENANCE : MAGASIN (RÉSERVE)").FontSize(8).Bold().FontColor(Colors.Purple.Darken2);
+                                col.Item().Text($"Émis par (Magasinier) : {user?.FirstName} {user?.LastName}").SemiBold();
+                            });
+
+                            table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Column(col =>
+                            {
+                                col.Item().Text("DESTINATION : BOUTIQUE (RAYON)").FontSize(8).Bold().FontColor(Colors.Blue.Darken2);
+                                col.Item().Text($"Personne Déléguée (Coursier) : {movement.DelegatePerson ?? "N/A"}").Bold().FontColor(Colors.Blue.Darken3);
+                            });
+                        });
+
+                        // Tableau Produit
+                        column.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.ConstantItem(70);
+                                columns.RelativeColumn(2);
+                                columns.ConstantItem(80);
+                                columns.ConstantItem(90);
+                                columns.ConstantItem(90);
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Background(Colors.Blue.Darken2).Padding(4).Text("SKU").FontColor(Colors.White).Bold();
+                                header.Cell().Background(Colors.Blue.Darken2).Padding(4).Text("Désignation Produit").FontColor(Colors.White).Bold();
+                                header.Cell().Background(Colors.Blue.Darken2).Padding(4).AlignRight().Text("Qté Prélevée").FontColor(Colors.White).Bold();
+                                header.Cell().Background(Colors.Blue.Darken2).Padding(4).AlignRight().Text("Stock Magasin").FontColor(Colors.White).Bold();
+                                header.Cell().Background(Colors.Blue.Darken2).Padding(4).AlignRight().Text("Stock Boutique").FontColor(Colors.White).Bold();
+                            });
+
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).Text(product?.SKU ?? "N/A");
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).Text(product?.Name ?? "N/A").Bold();
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).AlignRight().Text($"{movement.Quantity} {product?.Unit}").Bold().FontColor(Colors.Purple.Darken2);
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).AlignRight().Text($"{product?.WarehouseStock} {product?.Unit}");
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten3).Padding(5).AlignRight().Text($"{product?.ShopStock} {product?.Unit}");
+                        });
+
+                        if (!string.IsNullOrEmpty(movement.Reason) || !string.IsNullOrEmpty(movement.Reference))
+                        {
+                            column.Item().Text(text =>
+                            {
+                                text.Span("Motif / Référence : ").Bold();
+                                text.Span($"{movement.Reason ?? ""} {(movement.Reference != null ? $"({movement.Reference})" : "")}");
+                            });
+                        }
+
+                        // Cadres de signatures
+                        column.Item().PaddingTop(10).Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(1);
+                            });
+
+                            table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Height(55).Column(col =>
+                            {
+                                col.Item().Text("Signature Magasinier").FontSize(8).Bold();
+                            });
+
+                            table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Height(55).Column(col =>
+                            {
+                                col.Item().Text("Signature Délégué (Coursier)").FontSize(8).Bold();
+                            });
+
+                            table.Cell().Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Height(55).Column(col =>
+                            {
+                                col.Item().Text("Signature Réception Boutique").FontSize(8).Bold();
+                            });
+                        });
+                    });
+                }
+
+                void ComposeFooter(IContainer container)
+                {
+                    container.Row(row =>
+                    {
+                        row.RelativeItem().Text("Document officiel de décharge interne - SmartStock Lomé").FontSize(7.5f).FontColor(Colors.Grey.Medium);
+                        row.ConstantItem(100).AlignRight().Text("Page 1 / 1").FontSize(7.5f).FontColor(Colors.Grey.Medium);
+                    });
+                }
+            });
+        });
+
+        return document.GeneratePdf();
+    }
+
     internal static StockMovementDto MapToDto(StockMovement sm) => new(
         sm.Id,
         sm.ProductId,

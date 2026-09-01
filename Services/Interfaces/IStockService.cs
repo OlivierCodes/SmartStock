@@ -8,6 +8,7 @@ public interface IStockService
     Task<StockMovementDto> GetMovementByIdAsync(int id);
     Task<StockMovementDto> CreateMovementAsync(int userId, CreateStockMovementRequest request);
     Task<DailyReportDto> GetDailyReportAsync(DateTime date);
+    Task<byte[]> GenerateTransferReceiptPdfAsync(int movementId);
 }
 
 public interface ISaleService

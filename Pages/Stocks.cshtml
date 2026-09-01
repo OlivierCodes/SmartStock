@@ -348,11 +348,37 @@
                     const err = await resp.json().catch(() => null);
                     throw new Error(err?.message || 'Échec du transfert');
                 }
+                const movement = await resp.json();
                 closeTransferModal();
-                showToast('Prélèvement validé avec succès ! Stock boutique mis à jour.', 'success');
+                showToast('Prélèvement validé ! Génération du bon en cours...', 'success');
                 loadStocksData();
+
+                // Télécharger automatiquement le bon de prélèvement PDF
+                await downloadTransferReceipt(movement.id, token);
+
             } catch (err) {
                 showToast('Erreur: ' + err.message, 'danger');
+            }
+        }
+
+        async function downloadTransferReceipt(movementId, token) {
+            try {
+                const pdfResp = await fetch(`/api/stockMovements/${movementId}/transfer-receipt/pdf`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!pdfResp.ok) throw new Error('Erreur génération PDF');
+                const blob = await pdfResp.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Bon_Prelevement_${String(movementId).padStart(4, '0')}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                showToast('Bon de prélèvement téléchargé !', 'success');
+            } catch (err) {
+                showToast('Transfert validé, mais erreur PDF : ' + err.message, 'warning');
             }
         }
 

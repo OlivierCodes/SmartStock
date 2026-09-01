@@ -67,4 +67,16 @@ public class StockMovementsController : ControllerBase
         var reportDate = date ?? DateTime.UtcNow.Date;
         return Ok(await _stockService.GetDailyReportAsync(reportDate));
     }
+
+    /// <summary>Génère et télécharge le bon de transfert/prélèvement d'un mouvement de stock au format PDF.</summary>
+    [HttpGet("{id:int}/transfer-receipt/pdf")]
+    [Produces("application/pdf")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetTransferReceiptPdf(int id)
+    {
+        var pdfBytes = await _stockService.GenerateTransferReceiptPdfAsync(id);
+        var fileName = $"SmartStock_Bon_Prelevement_{id:D4}_{DateTime.UtcNow:yyyyMMdd}.pdf";
+        return File(pdfBytes, "application/pdf", fileName);
+    }
 }
