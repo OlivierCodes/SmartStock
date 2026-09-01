@@ -171,7 +171,39 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<SmartStockDbContext>();
-    await db.Database.MigrateAsync();
+    try
+    {
+        await db.Database.MigrateAsync();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[DB Migration Warning] {ex.Message}");
+    }
+
+    if (dbProvider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase))
+    {
+        try
+        {
+            await db.Database.ExecuteSqlRawAsync(@"
+                ALTER TABLE ""Products"" ADD COLUMN IF NOT EXISTS ""ShopStock"" integer NOT NULL DEFAULT 0;
+                ALTER TABLE ""Products"" ADD COLUMN IF NOT EXISTS ""WarehouseStock"" integer NOT NULL DEFAULT 0;
+                ALTER TABLE ""Products"" ADD COLUMN IF NOT EXISTS ""RetailPrice"" numeric(18,2) NOT NULL DEFAULT 0;
+                ALTER TABLE ""Products"" ADD COLUMN IF NOT EXISTS ""MediumPrice"" numeric(18,2) NOT NULL DEFAULT 0;
+                ALTER TABLE ""Products"" ADD COLUMN IF NOT EXISTS ""LastPrice"" numeric(18,2) NOT NULL DEFAULT 0;
+                ALTER TABLE ""StockMovements"" ADD COLUMN IF NOT EXISTS ""DelegatePerson"" character varying(200);
+                DO $$
+                BEGIN
+                    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'Products' AND column_name = 'CurrentStock') THEN
+                        UPDATE ""Products"" SET ""ShopStock"" = ""CurrentStock"" WHERE ""ShopStock"" = 0 AND ""WarehouseStock"" = 0 AND ""CurrentStock"" > 0;
+                    END IF;
+                END $$;
+            ");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DB Column Setup Warning] {ex.Message}");
+        }
+    }
 
     // Alimentation automatique de démonstration désactivée pour maintenir une base propre
     // await SmartStock.Data.DbSeeder.SeedDataAsync(scope.ServiceProvider);
