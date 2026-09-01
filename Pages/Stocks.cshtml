@@ -240,7 +240,6 @@
                     populateCategoryFilter();
                 }
 
-                updateKpis();
                 renderStocksTable(allProducts);
 
             } catch (e) {
@@ -253,33 +252,6 @@
             const select = document.getElementById('stock_category_filter');
             select.innerHTML = '<option value="">Toutes les catégories</option>' +
                 allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-        }
-
-        function updateKpis() {
-            let totalShop = 0;
-            let totalWarehouse = 0;
-            let totalAll = 0;
-            let lowStockCount = 0;
-
-            allProducts.forEach(p => {
-                const shop = p.shopStock ?? p.ShopStock ?? 0;
-                const warehouse = p.warehouseStock ?? p.WarehouseStock ?? 0;
-                const total = p.currentStock ?? p.CurrentStock ?? (shop + warehouse);
-                const minThreshold = p.minStockThreshold ?? p.MinStockThreshold ?? 5;
-
-                totalShop += shop;
-                totalWarehouse += warehouse;
-                totalAll += total;
-
-                if (total <= minThreshold || shop === 0) {
-                    lowStockCount++;
-                }
-            });
-
-            document.getElementById('kpi_total_shop').innerText = totalShop.toLocaleString('fr-FR');
-            document.getElementById('kpi_total_warehouse').innerText = totalWarehouse.toLocaleString('fr-FR');
-            document.getElementById('kpi_total_all').innerText = totalAll.toLocaleString('fr-FR');
-            document.getElementById('kpi_low_stock').innerText = lowStockCount;
         }
 
         function filterStocksTable() {
