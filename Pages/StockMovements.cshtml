@@ -1,4 +1,4 @@
-﻿@page
+@page
 @{
     ViewData["Title"] = "Mouvements de Stock";
     Layout = "_DashboardLayout";
@@ -7,11 +7,11 @@
 <div class="dashboard-header">
     <div class="dashboard-title">
         <h1>Mouvements de Stock</h1>
-        <p>EntrÃ©es magasin, sorties, et transferts Magasin â†’ Boutique.</p>
+        <p>Entrées magasin, sorties, et transferts Magasin → Boutique.</p>
     </div>
     <div style="display:flex; gap:0.75rem;">
         <button class="btn-secondary" onclick="openTransferModal()" style="padding:0.6rem 1.1rem; font-size:0.9rem; border-radius:8px;">
-            <i class="fa-solid fa-arrow-right-to-bracket"></i> PrÃ©lÃ¨vement Magasin â†’ Boutique
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Prélèvement Magasin → Boutique
         </button>
         <button class="btn-primary" onclick="openMovementModal()">
             <i class="fa-solid fa-arrow-right-arrow-left"></i> Nouveau Mouvement
@@ -36,10 +36,10 @@
                     <th>Date</th>
                     <th>Type</th>
                     <th>Produit</th>
-                    <th>QuantitÃ©</th>
-                    <th>Stock Total AprÃ¨s</th>
-                    <th>Raison / RÃ©fÃ©rence</th>
-                    <th>DÃ©lÃ©guÃ©</th>
+                    <th>Quantité</th>
+                    <th>Stock Total Après</th>
+                    <th>Raison / Référence</th>
+                    <th>Délégué</th>
                     <th>Utilisateur</th>
                 </tr>
             </thead>
@@ -52,7 +52,7 @@
     </div>
 </div>
 
-<!-- Modal: EntrÃ©e / Sortie Standard -->
+<!-- Modal: Entrée / Sortie Standard -->
 <div class="modal-overlay" id="movementModal">
     <div class="modal-content">
         <div class="modal-header">
@@ -71,21 +71,21 @@
                 <div style="flex: 1;">
                     <label>Type de Mouvement</label>
                     <select id="m_type" required>
-                        <option value="0">ðŸ“¦ EntrÃ©e Magasin (+)</option>
-                        <option value="1">ðŸ”» Sortie / Perte (-)</option>
+                        <option value="0">📦 Entrée Magasin (+)</option>
+                        <option value="1">🔻 Sortie / Perte (-)</option>
                     </select>
                 </div>
                 <div style="flex: 1;">
-                    <label>QuantitÃ©</label>
+                    <label>Quantité</label>
                     <input type="number" id="m_quantity" required min="1" value="1">
                 </div>
             </div>
             <div class="form-group">
                 <label>Raison</label>
-                <input type="text" id="m_reason" placeholder="Ex: RÃ©approvisionnement fournisseur">
+                <input type="text" id="m_reason" placeholder="Ex: Réapprovisionnement fournisseur">
             </div>
             <div class="form-group">
-                <label>RÃ©fÃ©rence</label>
+                <label>Référence</label>
                 <input type="text" id="m_reference" placeholder="Ex: BL-2026-0042">
             </div>
             <div class="modal-actions">
@@ -96,16 +96,16 @@
     </div>
 </div>
 
-<!-- Modal: Transfert Magasin â†’ Boutique (PrÃ©lÃ¨vement) -->
+<!-- Modal: Transfert Magasin → Boutique (Prélèvement) -->
 <div class="modal-overlay" id="transferModal">
     <div class="modal-content">
         <div class="modal-header" style="background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(59,130,246,0.1)); border-radius:8px 8px 0 0; padding:1rem 1.25rem;">
-            <h3><i class="fa-solid fa-truck-fast" style="color: var(--primary);"></i> PrÃ©lÃ¨vement Magasin â†’ Boutique</h3>
+            <h3><i class="fa-solid fa-truck-fast" style="color: var(--primary);"></i> Prélèvement Magasin → Boutique</h3>
             <button class="modal-close" onclick="closeModal('transferModal')"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <form id="transferForm" onsubmit="saveTransfer(event)">
             <div class="form-group" style="margin-top:1rem;">
-                <label>Produit Ã  prÃ©lever</label>
+                <label>Produit à prélever</label>
                 <select id="t_product" required onchange="onTransferProductChange(this)">
                     <option disabled selected>Chargement...</option>
                 </select>
@@ -119,22 +119,22 @@
             </div>
             <div class="form-group" style="display:flex; gap:1rem;">
                 <div style="flex:1;">
-                    <label>QuantitÃ© Ã  prÃ©lever</label>
+                    <label>Quantité à prélever</label>
                     <input type="number" id="t_quantity" required min="1" value="1">
                 </div>
             </div>
             <div class="form-group">
-                <label><i class="fa-solid fa-user" style="color:var(--primary); margin-right:5px;"></i>Personne dÃ©lÃ©guÃ©e (coursier / employÃ©)</label>
+                <label><i class="fa-solid fa-user" style="color:var(--primary); margin-right:5px;"></i>Personne déléguée (coursier / employé)</label>
                 <input type="text" id="t_delegate" placeholder="Ex: Jean-Pierre, Vendeur Salle A" required>
             </div>
             <div class="form-group">
                 <label>Raison / Note</label>
-                <input type="text" id="t_reason" placeholder="Ex: RÃ©approvisionnement urgent boutique">
+                <input type="text" id="t_reason" placeholder="Ex: Réapprovisionnement urgent boutique">
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn-secondary" onclick="closeModal('transferModal')">Annuler</button>
                 <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #8b5cf6, #3b82f6);">
-                    <i class="fa-solid fa-truck-fast"></i> Valider le PrÃ©lÃ¨vement
+                    <i class="fa-solid fa-truck-fast"></i> Valider le Prélèvement
                 </button>
             </div>
         </form>
@@ -184,7 +184,7 @@
             document.getElementById('transferModal').classList.add('show');
             const products = await loadProducts();
             const sel = document.getElementById('t_product');
-            sel.innerHTML = `<option disabled selected>-- SÃ©lectionner un produit --</option>` +
+            sel.innerHTML = `<option disabled selected>-- Sélectionner un produit --</option>` +
                 products.map(p =>
                     `<option value="${p.id}" data-shop="${p.shopStock}" data-warehouse="${p.warehouseStock}">[${p.sku || 'N/A'}] ${p.name}</option>`
                 ).join('');
@@ -216,7 +216,7 @@
                 });
                 if (!resp.ok) { const err = await resp.json(); throw new Error(err.message || 'Erreur'); }
                 closeModal('movementModal');
-                showToast('Mouvement enregistrÃ© avec succÃ¨s', 'success');
+                showToast('Mouvement enregistré avec succès', 'success');
                 loadMovements();
             } catch (err) {
                 showToast('Erreur: ' + err.message, 'danger');
@@ -230,7 +230,7 @@
                 productId: parseInt(document.getElementById('t_product').value),
                 type: 2, // TransfertBoutique
                 quantity: parseInt(document.getElementById('t_quantity').value),
-                reason: document.getElementById('t_reason').value || 'PrÃ©lÃ¨vement boutique',
+                reason: document.getElementById('t_reason').value || 'Prélèvement boutique',
                 delegatePerson: document.getElementById('t_delegate').value
             };
             try {
@@ -241,7 +241,7 @@
                 });
                 if (!resp.ok) { const err = await resp.json(); throw new Error(err.message || 'Erreur'); }
                 closeModal('transferModal');
-                showToast('PrÃ©lÃ¨vement validÃ© : stock boutique mis Ã  jour', 'success');
+                showToast('Prélèvement validé : stock boutique mis à jour', 'success');
                 loadMovements();
             } catch (err) {
                 showToast('Erreur: ' + err.message, 'danger');
@@ -266,7 +266,7 @@
                 const movements = result.items || result;
 
                 if (!movements || movements.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color: var(--text-muted); padding: 2rem;">Aucun mouvement trouvÃ©.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="color: var(--text-muted); padding: 2rem;">Aucun mouvement trouvé.</td></tr>';
                     return;
                 }
 
@@ -280,7 +280,7 @@
                     if (type === 1) return `color:var(--danger); font-weight:700`;
                     return `color:#8b5cf6; font-weight:700`;
                 };
-                const qtyPrefix = (type) => type === 0 ? '+' : (type === 1 ? '-' : 'â‡’');
+                const qtyPrefix = (type) => type === 0 ? '+' : (type === 1 ? '-' : '➔');
 
                 tbody.innerHTML = movements.map(m => `
                     <tr>
