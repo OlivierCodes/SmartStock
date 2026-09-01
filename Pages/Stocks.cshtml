@@ -21,49 +21,6 @@
     </div>
 </div>
 
-<!-- KPI Cards -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
-    <div class="glass-card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem; border-left: 4px solid #38bdf8;">
-        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(56, 189, 248, 0.15); display: flex; align-items: center; justify-content: center; color: #38bdf8; font-size: 1.4rem;">
-            <i class="fa-solid fa-store"></i>
-        </div>
-        <div>
-            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Total en Boutique</div>
-            <div id="kpi_total_shop" style="font-size: 1.5rem; font-weight: 700; color: #38bdf8;">-</div>
-        </div>
-    </div>
-
-    <div class="glass-card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem; border-left: 4px solid #a855f7;">
-        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(168, 85, 247, 0.15); display: flex; align-items: center; justify-content: center; color: #a855f7; font-size: 1.4rem;">
-            <i class="fa-solid fa-warehouse"></i>
-        </div>
-        <div>
-            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Total en Magasin (Réserve)</div>
-            <div id="kpi_total_warehouse" style="font-size: 1.5rem; font-weight: 700; color: #a855f7;">-</div>
-        </div>
-    </div>
-
-    <div class="glass-card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem; border-left: 4px solid var(--success);">
-        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(34, 197, 94, 0.15); display: flex; align-items: center; justify-content: center; color: var(--success); font-size: 1.4rem;">
-            <i class="fa-solid fa-boxes-stacked"></i>
-        </div>
-        <div>
-            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Stock Total Global</div>
-            <div id="kpi_total_all" style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary);">-</div>
-        </div>
-    </div>
-
-    <div class="glass-card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem; border-left: 4px solid var(--danger);">
-        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(239, 68, 68, 0.15); display: flex; align-items: center; justify-content: center; color: var(--danger); font-size: 1.4rem;">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-        </div>
-        <div>
-            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Alertes Stock Faible</div>
-            <div id="kpi_low_stock" style="font-size: 1.5rem; font-weight: 700; color: var(--danger);">-</div>
-        </div>
-    </div>
-</div>
-
 <div class="glass-card">
     <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
         <h3 class="card-title" style="margin: 0;"><i class="fa-solid fa-list-check" style="color: var(--primary); margin-right: 8px;"></i>Inventaire des Stocks par Produit</h3>
@@ -98,9 +55,9 @@
                     <th>SKU</th>
                     <th>Nom du Produit</th>
                     <th>Catégorie</th>
-                    <th style="color: #38bdf8; text-align: right;"><i class="fa-solid fa-store" style="margin-right: 4px;"></i>Stock Boutique</th>
-                    <th style="color: #a855f7; text-align: right;"><i class="fa-solid fa-warehouse" style="margin-right: 4px;"></i>Stock Magasin</th>
-                    <th style="text-align: right;"><i class="fa-solid fa-boxes-stacked" style="margin-right: 4px;"></i>Stock Total</th>
+                    <th style="color: #38bdf8; text-align: right;">Stock Boutique</th>
+                    <th style="color: #a855f7; text-align: right;">Stock Magasin</th>
+                    <th style="text-align: right;">Stock Total</th>
                     <th style="text-align: center;">Seuil d'Alerte</th>
                     <th style="text-align: center;">État</th>
                     <th style="text-align: center;">Action</th>
@@ -132,8 +89,8 @@
             
             <div id="t_stockInfo" style="display: none; margin-bottom: 1rem; padding: 0.75rem 1rem; border-radius: 8px; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2);">
                 <div style="display: flex; gap: 1.5rem; font-size: 0.9rem;">
-                    <div><i class="fa-solid fa-warehouse" style="color: #8b5cf6; margin-right: 5px;"></i><strong>Disponible en Magasin : </strong><span id="t_warehouseQty" style="font-weight: 700; color: #8b5cf6;">-</span></div>
-                    <div><i class="fa-solid fa-store" style="color: #3b82f6; margin-right: 5px;"></i><strong>Actuel en Boutique : </strong><span id="t_shopQty" style="font-weight: 700; color: #3b82f6;">-</span></div>
+                    <div><strong>Disponible en Magasin : </strong><span id="t_warehouseQty" style="font-weight: 700; color: #8b5cf6;">-</span></div>
+                    <div><strong>Actuel en Boutique : </strong><span id="t_shopQty" style="font-weight: 700; color: #3b82f6;">-</span></div>
                 </div>
             </div>
 
@@ -312,12 +269,12 @@
                         <td style="color: var(--text-muted); font-size: 0.9rem;">${p.categoryName || p.CategoryName || '-'}</td>
                         <td style="text-align: right;">
                             <span class="badge" style="background: ${shop === 0 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(56, 189, 248, 0.15)'}; color: ${shop === 0 ? 'var(--danger)' : '#38bdf8'}; font-weight: 700; font-size: 0.9rem;">
-                                <i class="fa-solid fa-store" style="margin-right: 4px;"></i>${shop} ${unit}
+                                ${shop} ${unit}
                             </span>
                         </td>
                         <td style="text-align: right;">
                             <span class="badge" style="background: ${warehouse === 0 ? 'rgba(148, 163, 184, 0.15)' : 'rgba(168, 85, 247, 0.15)'}; color: ${warehouse === 0 ? 'var(--text-muted)' : '#a855f7'}; font-weight: 700; font-size: 0.9rem;">
-                                <i class="fa-solid fa-warehouse" style="margin-right: 4px;"></i>${warehouse} ${unit}
+                                ${warehouse} ${unit}
                             </span>
                         </td>
                         <td style="text-align: right; font-weight: 700; font-size: 0.95rem; color: ${total <= threshold ? 'var(--danger)' : 'var(--text-primary)'};">
