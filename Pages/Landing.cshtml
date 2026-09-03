@@ -6,7 +6,7 @@
 <html lang="fr" data-theme="light">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>SmartStock — Solution Caisse Tactile &amp; Gestion Commerciale | HORAS GROUP</title>
     <meta name="description" content="SmartStock par HORAS GROUP : La solution tout-en-un de caisse tactile, gestion des stocks en temps réel et clôtures financières pour boutiques, restaurants, pharmacies et grossistes." />
     
@@ -17,7 +17,6 @@
     
     <!-- Bootstrap 5 & FontAwesome -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script>
@@ -42,10 +41,15 @@
             --stitch-text-title: #0b1c30;
             --stitch-text-body: #444651;
             --stitch-text-muted: #757682;
-            --stitch-nav-bg: rgba(248, 249, 255, 0.85);
+            --stitch-nav-bg: rgba(248, 249, 255, 0.9);
             --stitch-hero-bg: radial-gradient(circle at 10% 20%, rgba(75, 65, 225, 0.1) 0%, transparent 50%), radial-gradient(circle at 90% 80%, rgba(39, 195, 138, 0.12) 0%, transparent 50%), linear-gradient(135deg, #eff4ff 0%, #f8f9ff 50%, #e5eeff 100%);
             --stitch-footer-bg: #0b1c30;
             --stitch-footer-text: #cbdbf5;
+            --mockup-bg: #f8fafc;
+            --mockup-card: #ffffff;
+            --mockup-border: #e2e8f0;
+            --mockup-text-main: #0f172a;
+            --mockup-text-sub: #64748b;
         }
 
         [data-theme="dark"] {
@@ -64,10 +68,19 @@
             --stitch-text-title: #f8f9ff;
             --stitch-text-body: #d3e4fe;
             --stitch-text-muted: #94a3b8;
-            --stitch-nav-bg: rgba(7, 13, 24, 0.88);
+            --stitch-nav-bg: rgba(7, 13, 24, 0.92);
             --stitch-hero-bg: radial-gradient(circle at 10% 20%, rgba(75, 65, 225, 0.2) 0%, transparent 50%), radial-gradient(circle at 90% 80%, rgba(39, 195, 138, 0.15) 0%, transparent 50%), linear-gradient(135deg, #070d18 0%, #0d1728 50%, #070d18 100%);
             --stitch-footer-bg: #040810;
             --stitch-footer-text: #94a3b8;
+            --mockup-bg: #0b1324;
+            --mockup-card: #131f38;
+            --mockup-border: #1e293b;
+            --mockup-text-main: #f8fafc;
+            --mockup-text-sub: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
@@ -77,6 +90,7 @@
             overflow-x: hidden;
             line-height: 1.6;
             transition: background-color 0.3s ease, color 0.3s ease;
+            width: 100%;
         }
 
         h1, h2, h3, h4, h5, .brand-font {
@@ -98,20 +112,21 @@
 
         .stitch-logo-box {
             background: linear-gradient(135deg, #4b41e1, #27c38a);
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #ffffff;
             box-shadow: 0 8px 18px rgba(75, 65, 225, 0.35);
+            flex-shrink: 0;
         }
 
-        /* Hero Section with Organic Blobs & Curvatures */
+        /* Hero Section */
         .stitch-hero {
             position: relative;
-            padding: 120px 0 100px 0;
+            padding: 90px 0 70px 0;
             background: var(--stitch-hero-bg);
             overflow: hidden;
         }
@@ -180,21 +195,21 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(75, 65, 225, 0.25);
             color: var(--stitch-secondary);
-            padding: 8px 20px;
+            padding: 7px 18px;
             border-radius: 9999px;
-            font-size: 0.88rem;
+            font-size: 0.84rem;
             font-weight: 700;
             display: inline-flex;
             align-items: center;
             gap: 8px;
             box-shadow: 0 4px 15px rgba(75, 65, 225, 0.08);
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .gradient-headline {
-            font-size: clamp(2.5rem, 5.5vw, 4.2rem);
+            font-size: clamp(2rem, 4.5vw, 3.8rem);
             font-weight: 900;
-            line-height: 1.1;
+            line-height: 1.15;
             letter-spacing: -0.03em;
             color: var(--stitch-text-title);
         }
@@ -210,18 +225,19 @@
             color: #ffffff !important;
             font-weight: 700;
             border-radius: 9999px;
-            padding: 16px 36px;
+            padding: 14px 30px;
             border: none;
-            box-shadow: 0 12px 28px rgba(75, 65, 225, 0.35);
+            box-shadow: 0 10px 24px rgba(75, 65, 225, 0.35);
             transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
             text-decoration: none;
         }
         .btn-stitch-primary:hover {
-            transform: scale(1.05) translateY(-2px);
-            box-shadow: 0 18px 36px rgba(75, 65, 225, 0.45);
+            transform: translateY(-2px);
+            box-shadow: 0 16px 32px rgba(75, 65, 225, 0.45);
         }
 
         .btn-stitch-outline {
@@ -230,11 +246,12 @@
             color: var(--stitch-secondary) !important;
             font-weight: 700;
             border-radius: 9999px;
-            padding: 15px 32px;
+            padding: 13px 28px;
             border: 2px solid rgba(75, 65, 225, 0.2);
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
             text-decoration: none;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
@@ -246,28 +263,30 @@
             box-shadow: 0 8px 20px rgba(75, 65, 225, 0.15);
         }
 
-        /* 3D Perspective POS Browser Mockup */
+        /* 3D Browser Mockup with Real Native Dashboard UI */
         .stitch-perspective-wrap {
-            perspective: 2000px;
+            perspective: 1600px;
+            width: 100%;
         }
 
         .stitch-browser-mockup {
-            border-radius: 28px;
-            border: 4px solid rgba(255, 255, 255, 0.95);
-            background: var(--stitch-surface-card);
-            box-shadow: 0 30px 60px -15px rgba(75, 65, 225, 0.25), 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            border-radius: 24px;
+            border: 1px solid var(--stitch-card-border);
+            background: var(--mockup-bg);
+            box-shadow: 0 25px 60px -15px rgba(75, 65, 225, 0.25), 0 10px 25px -5px rgba(0, 0, 0, 0.08);
             overflow: hidden;
-            transform: rotateY(-8deg) rotateX(4deg);
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s ease;
+            transform: rotateY(-6deg) rotateX(3deg);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+            width: 100%;
         }
         .stitch-browser-mockup:hover {
-            transform: rotateY(0deg) rotateX(0deg) scale(1.02);
-            box-shadow: 0 40px 80px -20px rgba(75, 65, 225, 0.35);
+            transform: rotateY(0deg) rotateX(0deg) scale(1.01);
+            box-shadow: 0 35px 70px -18px rgba(75, 65, 225, 0.35);
         }
 
         .stitch-browser-header {
             background: var(--stitch-surface-container);
-            padding: 14px 20px;
+            padding: 12px 18px;
             display: flex;
             align-items: center;
             border-bottom: 1px solid var(--stitch-card-border);
@@ -277,14 +296,53 @@
             background: var(--stitch-surface-card);
             border: 1px solid var(--stitch-card-border);
             border-radius: 9999px;
-            padding: 4px 24px;
-            font-size: 0.8rem;
+            padding: 3px 20px;
+            font-size: 0.78rem;
             color: var(--stitch-text-muted);
             display: inline-flex;
             align-items: center;
             gap: 6px;
             margin: 0 auto;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            white-space: nowrap;
+        }
+
+        /* Native Live Dashboard Preview Inside Mockup */
+        .mockup-dashboard-content {
+            padding: 18px;
+            font-size: 0.85rem;
+        }
+
+        .mockup-kpi-card {
+            background: var(--mockup-card);
+            border: 1px solid var(--mockup-border);
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            transition: all 0.2s ease;
+        }
+        .mockup-kpi-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .mockup-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .mockup-badge-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.72rem;
+            padding: 3px 10px;
+            border-radius: 9999px;
+            font-weight: 700;
         }
 
         /* Trust / Stats Metric Strip */
@@ -292,42 +350,12 @@
             background: var(--stitch-surface-card);
             border-top: 1px solid var(--stitch-card-border);
             border-bottom: 1px solid var(--stitch-card-border);
-            padding: 50px 0;
+            padding: 45px 0;
             position: relative;
             z-index: 10;
         }
 
         .metric-icon-bubble {
-            width: 64px;
-            height: 64px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            margin: 0 auto 18px auto;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
-        }
-
-        /* Modern Enterprise Feature Cards */
-        .stitch-card {
-            background: var(--stitch-surface-card);
-            border: 1px solid var(--stitch-card-border);
-            border-radius: 24px;
-            padding: 36px 30px;
-            box-shadow: var(--stitch-card-shadow);
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            height: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-        .stitch-card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--stitch-card-shadow-hover);
-            border-color: rgba(75, 65, 225, 0.4);
-        }
-
-        .stitch-icon-box {
             width: 58px;
             height: 58px;
             border-radius: 18px;
@@ -335,62 +363,124 @@
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
-            margin-bottom: 22px;
+            margin: 0 auto 14px auto;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Modern Feature Cards */
+        .stitch-card {
+            background: var(--stitch-surface-card);
+            border: 1px solid var(--stitch-card-border);
+            border-radius: 22px;
+            padding: 30px 24px;
+            box-shadow: var(--stitch-card-shadow);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        .stitch-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--stitch-card-shadow-hover);
+            border-color: rgba(75, 65, 225, 0.35);
+        }
+
+        .stitch-icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 18px;
         }
 
         /* Pricing Cards */
         .stitch-pricing-card {
             background: var(--stitch-surface-card);
             border: 2px solid var(--stitch-card-border);
-            border-radius: 28px;
-            padding: 44px 34px;
+            border-radius: 24px;
+            padding: 36px 28px;
             box-shadow: var(--stitch-card-shadow);
             position: relative;
             height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .stitch-pricing-card:hover {
-            transform: translateY(-8px);
+            transform: translateY(-6px);
             border-color: var(--stitch-secondary);
         }
 
         .stitch-pricing-card.is-popular {
             border-color: var(--stitch-secondary);
             background: linear-gradient(180deg, rgba(75, 65, 225, 0.04) 0%, var(--stitch-surface-card) 100%);
-            box-shadow: 0 30px 60px -15px rgba(75, 65, 225, 0.25);
-            transform: scale(1.03);
+            box-shadow: 0 25px 50px -15px rgba(75, 65, 225, 0.25);
+            transform: scale(1.02);
         }
         .stitch-pricing-card.is-popular:hover {
-            transform: scale(1.05) translateY(-8px);
+            transform: scale(1.04) translateY(-6px);
         }
 
         .stitch-popular-ribbon {
             position: absolute;
-            top: -15px;
+            top: -14px;
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(135deg, #f59e0b, #ef4444);
             color: #ffffff;
-            font-size: 0.78rem;
+            font-size: 0.75rem;
             font-weight: 800;
-            letter-spacing: 0.06em;
-            padding: 6px 20px;
+            letter-spacing: 0.05em;
+            padding: 5px 18px;
             border-radius: 9999px;
-            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+            white-space: nowrap;
         }
 
-        /* Footer Curved Top */
+        /* Footer */
         .stitch-footer {
             background: var(--stitch-footer-bg);
             color: var(--stitch-footer-text);
-            border-radius: 40px 40px 0 0;
-            padding: 90px 0 40px 0;
+            border-radius: 36px 36px 0 0;
+            padding: 70px 0 35px 0;
             position: relative;
             z-index: 10;
-            margin-top: -30px;
+        }
+
+        /* Media Queries for 100% Responsiveness */
+        @@media (max-width: 991.98px) {
+            .stitch-browser-mockup {
+                transform: none !important;
+                margin-top: 1.5rem;
+            }
+            .stitch-hero {
+                padding: 60px 0 50px 0;
+            }
+            .stitch-pricing-card.is-popular {
+                transform: none;
+            }
+            .stitch-pricing-card.is-popular:hover {
+                transform: translateY(-6px);
+            }
+        }
+
+        @@media (max-width: 575.98px) {
+            .mockup-dashboard-content {
+                padding: 12px;
+            }
+            .gradient-headline {
+                font-size: 2.1rem;
+            }
+            .stitch-card {
+                padding: 22px 18px;
+            }
+            .stitch-pricing-card {
+                padding: 28px 20px;
+            }
         }
     </style>
 </head>
@@ -398,16 +488,16 @@
 
     <!-- NAVBAR -->
     <header class="stitch-nav">
-        <div class="container py-3">
+        <div class="container py-2 py-md-3">
             <div class="d-flex justify-content-between align-items-center">
                 <!-- Brand -->
-                <a class="d-flex align-items-center gap-3 text-decoration-none" href="/">
+                <a class="d-flex align-items-center gap-2 gap-md-3 text-decoration-none" href="/">
                     <div class="stitch-logo-box">
                         <i class="fa-solid fa-boxes-stacked fs-5"></i>
                     </div>
                     <div>
                         <span class="fs-4 fw-black brand-font" style="color: var(--stitch-text-title); font-weight: 900;">SmartStock</span>
-                        <span class="badge bg-primary bg-opacity-10 text-primary ms-1 px-2 py-1 rounded-pill small fw-bold" style="font-size: 0.7rem;">v2.0</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary ms-1 px-2 py-0.5 rounded-pill small fw-bold" style="font-size: 0.68rem;">v2.0</span>
                     </div>
                 </a>
 
@@ -419,14 +509,14 @@
                 </nav>
 
                 <!-- Actions & Theme Toggle -->
-                <div class="d-flex align-items-center gap-3">
-                    <a href="/Login" class="btn btn-stitch-outline py-2 px-4 d-none d-sm-inline-flex">
+                <div class="d-flex align-items-center gap-2 gap-sm-3">
+                    <a href="/Login" class="btn btn-stitch-outline py-2 px-3 px-sm-4">
                         <i class="fa-solid fa-arrow-right-to-bracket me-1"></i> Connexion
                     </a>
-                    <a href="#contact" class="btn btn-stitch-primary py-2 px-4">
-                        <i class="fa-solid fa-bolt me-1"></i> Demander une Démo
+                    <a href="#contact" class="btn btn-stitch-primary py-2 px-3 px-sm-4 d-none d-sm-inline-flex">
+                        <i class="fa-solid fa-bolt me-1"></i> Démo
                     </a>
-                    <button class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center p-2 border" id="themeToggleBtn" type="button" title="Changer le thème" style="width: 40px; height: 40px; border-color: var(--stitch-card-border) !important; background: var(--stitch-surface-card);">
+                    <button class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center p-2 border" id="themeToggleBtn" type="button" title="Changer le thème" style="width: 38px; height: 38px; border-color: var(--stitch-card-border) !important; background: var(--stitch-surface-card);">
                         <i class="fa-solid fa-moon text-warning" id="themeIcon"></i>
                     </button>
                 </div>
@@ -434,103 +524,223 @@
         </div>
     </header>
 
-    <!-- HERO SECTION WITH ORGANIC BLOBS & 3D PERSPECTIVE MOCKUP -->
+    <!-- HERO SECTION WITH REAL LIVE DASHBOARD MOCKUP -->
     <section class="stitch-hero">
-        <!-- Ambient Floating Glows -->
         <div class="ambient-glow-1"></div>
         <div class="ambient-glow-2"></div>
-
-        <!-- Floating Organic SVG Blobs -->
-        <svg class="stitch-blob stitch-blob-1" viewBox="0 0 100 100">
-            <path fill="currentColor" d="M48.2,12.5C65.5,8.8,83.9,18,91.3,34.2c7.6,16.5,4.3,37.3-8.5,50.4C70,97.7,48.7,99,31.7,90.2 C14.3,81.2,3.3,61.9,6.5,42.5C9.6,23.3,30.3,16.4,48.2,12.5z"></path>
-        </svg>
-        <svg class="stitch-blob stitch-blob-2" viewBox="0 0 100 100">
-            <path fill="currentColor" d="M85.7,24.8c13,15.6,15.6,39.1,6.1,56.8c-9.6,17.9-30.8,24-49.8,17.4C22.6,92.2,9,74,5.4,53.8 C1.8,33.5,13.2,12.4,32.3,4.9C51.1-2.6,72.4,8.8,85.7,24.8z"></path>
-        </svg>
 
         <div class="container position-relative" style="z-index: 10;">
             <div class="row align-items-center gy-5">
                 <!-- Left: Headline & CTA -->
-                <div class="col-lg-6 text-center text-lg-start">
+                <div class="col-lg-5 text-center text-lg-start">
                     <div class="hero-badge-pill">
                         <i class="fa-solid fa-crown text-warning"></i>
-                        <span>Propulsé par HORAS GROUP • Creative Solutions</span>
+                        <span>Propulsé par HORAS GROUP • Togo</span>
                     </div>
 
-                    <h1 class="gradient-headline mb-4">
+                    <h1 class="gradient-headline mb-3">
                         Gérez vos stocks &amp; ventes en <br />
                         <span class="gradient-text-accent">toute simplicité</span>
                     </h1>
 
-                    <p class="fs-5 mb-4 text-muted" style="max-width: 580px; line-height: 1.6;">
-                        La solution moderne tout-en-un de <strong>caisse tactile</strong>, <strong>gestion de stock multi-dépôts</strong> et <strong>suivi financier en temps réel</strong> conçue par HORAS GROUP pour boutiques, magasins et grossistes.
+                    <p class="fs-6 mb-4 text-muted" style="max-width: 540px; line-height: 1.6;">
+                        La solution tout-en-un de <strong>caisse tactile</strong>, <strong>gestion multi-emplacements (Dépôt + Boutique)</strong> et <strong>clôtures financières journalières</strong> conçue pour commerces, restaurants et grossistes.
                     </p>
 
                     <div class="d-flex flex-column flex-sm-row align-items-center gap-3 justify-content-center justify-content-lg-start mb-4">
-                        <a href="/Login" class="btn-stitch-primary fs-6 w-100- w-sm-auto">
-                            <i class="fa-solid fa-arrow-right-to-bracket"></i> Accéder à l'Espace
+                        <a href="/Login" class="btn-stitch-primary w-100 w-sm-auto">
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i> Espace Caisse &amp; Gestion
                         </a>
-                        <a href="#fonctionnalites" class="btn-stitch-outline fs-6 w-100- w-sm-auto">
-                            Découvrir les Modules
+                        <a href="#fonctionnalites" class="btn-stitch-outline w-100 w-sm-auto">
+                            Voir les modules
                         </a>
                     </div>
 
-                    <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start gap-3 small pt-2">
-                        <span class="badge bg-white text-dark border px-3 py-2 rounded-pill shadow-sm">
-                            <i class="fa-solid fa-circle-check text-success me-1"></i> Multi-utilisateurs &amp; Rôles
+                    <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start gap-2 small pt-1">
+                        <span class="badge bg-white text-dark border px-2.5 py-1.5 rounded-pill shadow-sm">
+                            <i class="fa-solid fa-circle-check text-success me-1"></i> Multi-utilisateurs
                         </span>
-                        <span class="badge bg-white text-dark border px-3 py-2 rounded-pill shadow-sm">
-                            <i class="fa-solid fa-circle-check text-success me-1"></i> Support local à Lomé (+228)
+                        <span class="badge bg-white text-dark border px-2.5 py-1.5 rounded-pill shadow-sm">
+                            <i class="fa-solid fa-circle-check text-success me-1"></i> Support Lomé (+228)
                         </span>
-                        <span class="badge bg-white text-dark border px-3 py-2 rounded-pill shadow-sm">
-                            <i class="fa-solid fa-circle-check text-success me-1"></i> Compatible Mobile &amp; PC
+                        <span class="badge bg-white text-dark border px-2.5 py-1.5 rounded-pill shadow-sm">
+                            <i class="fa-solid fa-circle-check text-success me-1"></i> Mobile &amp; PC
                         </span>
                     </div>
                 </div>
 
-                <!-- Right: 3D Perspective POS Browser Mockup -->
-                <div class="col-lg-6">
+                <!-- Right: High-Fidelity Responsive Dashboard Vector Mockup -->
+                <div class="col-lg-7">
                     <div class="stitch-perspective-wrap position-relative">
                         <!-- Floating SaaS Pill Top-Right -->
-                        <div class="position-absolute d-none d-sm-flex align-items-center gap-2 px-3 py-2 bg-white rounded-pill shadow-lg border" style="top: -16px; right: 10px; z-index: 20; color: #0b1c30;">
-                            <span class="rounded-circle bg-success d-inline-block animate-pulse" style="width: 8px; height: 8px;"></span>
-                            <span class="small fw-bold" style="font-size: 0.78rem;">Tableau de Bord en direct</span>
+                        <div class="position-absolute d-none d-sm-flex align-items-center gap-2 px-3 py-1.5 bg-white rounded-pill shadow-lg border" style="top: -14px; right: 10px; z-index: 20; color: #0b1c30;">
+                            <span class="rounded-circle bg-success d-inline-block" style="width: 8px; height: 8px;"></span>
+                            <span class="small fw-bold" style="font-size: 0.76rem;">Tableau de Bord Live • HORAS GROUP</span>
                         </div>
 
                         <!-- Browser Mockup Window -->
                         <div class="stitch-browser-mockup">
-                            <!-- Header -->
+                            <!-- macOS Browser Header -->
                             <div class="stitch-browser-header">
-                                <div class="d-flex align-items-center gap-2" style="width: 70px;">
-                                    <span class="rounded-circle d-inline-block" style="width: 11px; height: 11px; background: #ff5f56; border: 1px solid #e0443e;"></span>
-                                    <span class="rounded-circle d-inline-block" style="width: 11px; height: 11px; background: #ffbd2e; border: 1px solid #dea123;"></span>
-                                    <span class="rounded-circle d-inline-block" style="width: 11px; height: 11px; background: #27c93f; border: 1px solid #1aab29;"></span>
+                                <div class="d-flex align-items-center gap-2" style="width: 60px;">
+                                    <span class="rounded-circle d-inline-block" style="width: 10px; height: 10px; background: #ff5f56;"></span>
+                                    <span class="rounded-circle d-inline-block" style="width: 10px; height: 10px; background: #ffbd2e;"></span>
+                                    <span class="rounded-circle d-inline-block" style="width: 10px; height: 10px; background: #27c93f;"></span>
                                 </div>
                                 <div class="stitch-url-pill">
                                     <i class="fa-solid fa-lock text-success small"></i>
-                                    <span>app.smartstock.com/dashboard</span>
+                                    <span>app.smartstock.tg/dashboard</span>
                                 </div>
-                                <div style="width: 70px;" class="text-end">
-                                    <span class="badge bg-success bg-opacity-10 text-success fw-bold" style="font-size: 0.72rem;">
-                                        <i class="fa-solid fa-wifi me-1"></i> 24/7
+                                <div style="width: 60px;" class="text-end">
+                                    <span class="badge bg-success bg-opacity-10 text-success fw-bold" style="font-size: 0.68rem;">
+                                        24/7
                                     </span>
                                 </div>
                             </div>
 
-                            <!-- Capture -->
-                            <div class="position-relative overflow-hidden" style="background: #ffffff;">
-                                <img src="~/capture.png" asp-append-version="true" alt="Tableau de bord SmartStock — HORAS GROUP" class="img-fluid w-100 d-block" style="display: block; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; transition: transform 0.5s ease;" />
+                            <!-- Live Native Mockup Body -->
+                            <div class="mockup-dashboard-content">
+                                <!-- Top Bar Inside Mockup -->
+                                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--mockup-border) !important;">
+                                    <div>
+                                        <h5 class="fw-bold mb-0 brand-font" style="color: var(--mockup-text-main); font-size: 1.1rem;">
+                                            <i class="fa-solid fa-store text-primary me-2"></i>Boutique Principale Lomé
+                                        </h5>
+                                        <small style="color: var(--mockup-text-sub); font-size: 0.72rem;">Session caisse ouverte • Gérant HORAS</small>
+                                    </div>
+                                    <span class="mockup-badge-live bg-success bg-opacity-10 text-success">
+                                        <i class="fa-solid fa-circle text-success" style="font-size: 0.5rem;"></i> Synchronisé
+                                    </span>
+                                </div>
+
+                                <!-- 4 KPI Cards Grid -->
+                                <div class="row g-2 mb-3">
+                                    <!-- KPI 1 -->
+                                    <div class="col-6 col-md-3">
+                                        <div class="mockup-kpi-card">
+                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                <div class="mockup-icon" style="background: rgba(75, 65, 225, 0.12); color: #4b41e1;">
+                                                    <i class="fa-solid fa-coins"></i>
+                                                </div>
+                                                <div class="text-truncate">
+                                                    <div style="font-size: 0.68rem; color: var(--mockup-text-sub);">CA du Jour</div>
+                                                    <strong class="brand-font" style="font-size: 0.92rem; color: var(--mockup-text-main);">185 400 F</strong>
+                                                </div>
+                                            </div>
+                                            <small class="text-success fw-bold" style="font-size: 0.65rem;">↗ +14.2% hier</small>
+                                        </div>
+                                    </div>
+
+                                    <!-- KPI 2 -->
+                                    <div class="col-6 col-md-3">
+                                        <div class="mockup-kpi-card">
+                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                <div class="mockup-icon" style="background: rgba(39, 195, 138, 0.12); color: #27c38a;">
+                                                    <i class="fa-solid fa-receipt"></i>
+                                                </div>
+                                                <div class="text-truncate">
+                                                    <div style="font-size: 0.68rem; color: var(--mockup-text-sub);">Tickets Ventes</div>
+                                                    <strong class="brand-font" style="font-size: 0.92rem; color: var(--mockup-text-main);">48 ventes</strong>
+                                                </div>
+                                            </div>
+                                            <small class="text-success fw-bold" style="font-size: 0.65rem;">✓ 0 annulé</small>
+                                        </div>
+                                    </div>
+
+                                    <!-- KPI 3 -->
+                                    <div class="col-6 col-md-3">
+                                        <div class="mockup-kpi-card">
+                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                <div class="mockup-icon" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">
+                                                    <i class="fa-solid fa-shop"></i>
+                                                </div>
+                                                <div class="text-truncate">
+                                                    <div style="font-size: 0.68rem; color: var(--mockup-text-sub);">Stock Boutique</div>
+                                                    <strong class="brand-font" style="font-size: 0.92rem; color: var(--mockup-text-main);">1 420 art.</strong>
+                                                </div>
+                                            </div>
+                                            <small class="text-primary fw-bold" style="font-size: 0.65rem;">12 catégories</small>
+                                        </div>
+                                    </div>
+
+                                    <!-- KPI 4 -->
+                                    <div class="col-6 col-md-3">
+                                        <div class="mockup-kpi-card">
+                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                <div class="mockup-icon" style="background: rgba(0, 35, 111, 0.12); color: #1e3a8a;">
+                                                    <i class="fa-solid fa-warehouse"></i>
+                                                </div>
+                                                <div class="text-truncate">
+                                                    <div style="font-size: 0.68rem; color: var(--mockup-text-sub);">Stock Dépôt</div>
+                                                    <strong class="brand-font" style="font-size: 0.92rem; color: var(--mockup-text-main);">8 950 art.</strong>
+                                                </div>
+                                            </div>
+                                            <small class="text-muted" style="font-size: 0.65rem;">Prêt au transfert</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Lower Interactive Table & Visual Overview -->
+                                <div class="row g-2">
+                                    <div class="col-md-7">
+                                        <div class="mockup-kpi-card h-100 p-2.5">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="fw-bold" style="font-size: 0.78rem; color: var(--mockup-text-main);"><i class="fa-solid fa-bolt text-warning me-1"></i> Dernières Ventes Caisse</span>
+                                                <span class="badge bg-primary bg-opacity-10 text-primary" style="font-size: 0.65rem;">Direct</span>
+                                            </div>
+                                            <div class="d-flex flex-column gap-1.5">
+                                                <div class="d-flex justify-content-between align-items-center p-1.5 rounded bg-light border" style="font-size: 0.72rem; background: var(--stitch-surface-container) !important; border-color: var(--mockup-border) !important;">
+                                                    <div><strong>#1042</strong> • Huile Végétale 5L (x2)</div>
+                                                    <span class="badge bg-success text-white fw-bold">14 000 F</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center p-1.5 rounded bg-light border" style="font-size: 0.72rem; background: var(--stitch-surface-container) !important; border-color: var(--mockup-border) !important;">
+                                                    <div><strong>#1041</strong> • Sac de Riz 25kg (x1)</div>
+                                                    <span class="badge bg-success text-white fw-bold">19 500 F</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center p-1.5 rounded bg-light border" style="font-size: 0.72rem; background: var(--stitch-surface-container) !important; border-color: var(--mockup-border) !important;">
+                                                    <div><strong>#1040</strong> • Pack Savon Beauté (x6)</div>
+                                                    <span class="badge bg-success text-white fw-bold">4 800 F</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-5">
+                                        <div class="mockup-kpi-card h-100 p-2.5">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="fw-bold" style="font-size: 0.78rem; color: var(--mockup-text-main);"><i class="fa-solid fa-arrow-right-arrow-left text-primary me-1"></i> Mouvements</span>
+                                                <span class="text-success small fw-bold" style="font-size: 0.68rem;">100% OK</span>
+                                            </div>
+                                            <div class="d-flex flex-column gap-1.5" style="font-size: 0.72rem;">
+                                                <div class="p-1.5 rounded border" style="border-color: var(--mockup-border) !important;">
+                                                    <div class="d-flex justify-content-between">
+                                                        <span class="fw-bold text-primary">Transfert validé</span>
+                                                        <span class="text-muted">Il y a 10 min</span>
+                                                    </div>
+                                                    <small class="text-muted d-block">Dépôt central → Boutique (+50 unités)</small>
+                                                </div>
+                                                <div class="p-1.5 rounded border" style="border-color: var(--mockup-border) !important;">
+                                                    <div class="d-flex justify-content-between">
+                                                        <span class="fw-bold text-success">Réapprovisionnement</span>
+                                                        <span class="text-muted">Ce matin</span>
+                                                    </div>
+                                                    <small class="text-muted d-block">Fournisseur Lomé (+200 cartons)</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Floating SaaS Badge Bottom-Left -->
-                        <div class="position-absolute d-none d-md-flex align-items-center gap-3 p-3 bg-white rounded-4 shadow-lg border" style="bottom: -22px; left: -20px; z-index: 20; color: #0b1c30; backdrop-filter: blur(12px);">
-                            <div class="rounded-3 p-2.5 d-flex align-items-center justify-content-center text-white" style="background: linear-gradient(135deg, #4b41e1, #27c38a); width: 42px; height: 42px;">
-                                <i class="fa-solid fa-chart-line fs-5"></i>
+                        <div class="position-absolute d-none d-md-flex align-items-center gap-2.5 p-2.5 bg-white rounded-4 shadow-lg border" style="bottom: -18px; left: -15px; z-index: 20; color: #0b1c30; backdrop-filter: blur(12px);">
+                            <div class="rounded-3 p-2 d-flex align-items-center justify-content-center text-white" style="background: linear-gradient(135deg, #4b41e1, #27c38a); width: 38px; height: 38px;">
+                                <i class="fa-solid fa-chart-line fs-6"></i>
                             </div>
                             <div>
-                                <small class="text-muted d-block fw-semibold" style="font-size: 0.75rem;">Suivi des Ventes &amp; Stocks</small>
-                                <strong class="fs-6 fw-bold text-success">100% Automatisé</strong>
+                                <small class="text-muted d-block fw-semibold" style="font-size: 0.7rem;">Suivi Ventes &amp; Stocks</small>
+                                <strong class="small fw-bold text-success" style="font-size: 0.82rem;">100% Automatisé</strong>
                             </div>
                         </div>
                     </div>
@@ -558,7 +768,7 @@
                     </div>
                     <div class="fs-2 fw-black mb-1 brand-font" style="color: var(--stitch-tertiary-accent); font-weight: 900;">&lt; 2 min</div>
                     <div class="fw-bold" style="color: var(--stitch-text-title);">Clôture Journalière</div>
-                    <div class="small text-muted mt-1">Rapports &amp; totaux calculés sans erreur</div>
+                    <div class="small text-muted mt-1">Rapports &amp; totaux sans erreur</div>
                 </div>
 
                 <div class="col-6 col-md-3">
@@ -566,8 +776,8 @@
                         <i class="fa-solid fa-boxes-stacked"></i>
                     </div>
                     <div class="fs-2 fw-black mb-1 brand-font" style="color: var(--stitch-primary); font-weight: 900;">100%</div>
-                    <div class="fw-bold" style="color: var(--stitch-text-title);">Traçabilité Dépôt &amp; Boutique</div>
-                    <div class="small text-muted mt-1">Zéro écart de stock inexpliqué</div>
+                    <div class="fw-bold" style="color: var(--stitch-text-title);">Traçabilité Dépôt / Boutique</div>
+                    <div class="small text-muted mt-1">Zéro perte non justifiée</div>
                 </div>
 
                 <div class="col-6 col-md-3">
@@ -583,23 +793,23 @@
     </section>
 
     <!-- SECTEURS D'ACTIVITÉ -->
-    <section class="py-5 my-5" id="secteurs">
+    <section class="py-5 my-3" id="secteurs">
         <div class="container">
             <div class="text-center mx-auto mb-5" style="max-width: 700px;">
                 <span class="hero-badge-pill">
                     <i class="fa-solid fa-shapes"></i> Adapté à votre métier
                 </span>
-                <h2 class="fw-bold mb-3" style="color: var(--stitch-text-title); font-size: 2.3rem;">Une solution taillée pour chaque secteur commercial</h2>
+                <h2 class="fw-bold mb-3" style="color: var(--stitch-text-title); font-size: 2.2rem;">Une solution taillée pour chaque secteur commercial</h2>
                 <p class="text-muted fs-6">Quel que soit votre type de commerce, SmartStock modernise vos encaissements et optimise vos stocks.</p>
             </div>
 
-            <div class="row g-4">
+            <div class="row g-3 g-md-4">
                 <div class="col-md-6 col-lg-3">
                     <div class="stitch-card">
                         <div class="stitch-icon-box" style="background: rgba(75, 65, 225, 0.1); color: var(--stitch-secondary);">
                             <i class="fa-solid fa-shirt"></i>
                         </div>
-                        <h5 class="fw-bold mb-2" style="color: var(--stitch-text-title);">Boutiques &amp; Prêt-à-porter</h5>
+                        <h5 class="fw-bold mb-2" style="color: var(--stitch-text-title);">Boutiques &amp; Mode</h5>
                         <p class="small text-muted mb-0">
                             Gestion des articles, lecteur code-barres, tickets de caisse thermiques, remises et suivi du panier moyen.
                         </p>
@@ -611,9 +821,9 @@
                         <div class="stitch-icon-box" style="background: rgba(39, 195, 138, 0.1); color: var(--stitch-tertiary-accent);">
                             <i class="fa-solid fa-utensils"></i>
                         </div>
-                        <h5 class="fw-bold mb-2" style="color: var(--stitch-text-title);">Restaurants, Bars &amp; Fast-Food</h5>
+                        <h5 class="fw-bold mb-2" style="color: var(--stitch-text-title);">Restaurants &amp; Bars</h5>
                         <p class="small text-muted mb-0">
-                            Prise de commande ultra rapide, suivi des consommations, gestion des tables et encaissement instantané.
+                            Prise de commande rapide, gestion des consommations et encaissement express sans attente.
                         </p>
                     </div>
                 </div>
@@ -637,7 +847,7 @@
                         </div>
                         <h5 class="fw-bold mb-2" style="color: var(--stitch-text-title);">Grossistes &amp; Dépôts</h5>
                         <p class="small text-muted mb-0">
-                            Transferts Dépôt vers Boutique, grilles de prix par paliers (Détail, Demi-gros, Gros), et factures professionnelles.
+                            Transferts Dépôt vers Boutique, grilles de prix par paliers (Détail, Demi-gros, Gros) et factures pro.
                         </p>
                     </div>
                 </div>
@@ -647,16 +857,16 @@
 
     <!-- FONCTIONNALITÉS & MODULES CLÉS -->
     <section class="py-5 position-relative" id="fonctionnalites" style="background: var(--stitch-surface-container);">
-        <div class="container py-4">
+        <div class="container py-3">
             <div class="text-center mx-auto mb-5" style="max-width: 700px;">
                 <span class="hero-badge-pill">
                     <i class="fa-solid fa-wand-magic-sparkles"></i> Puissance &amp; Simplicité
                 </span>
-                <h2 class="fw-bold mb-3" style="color: var(--stitch-text-title); font-size: 2.3rem;">Tout ce qu'il vous faut pour piloter votre commerce</h2>
+                <h2 class="fw-bold mb-3" style="color: var(--stitch-text-title); font-size: 2.2rem;">Tout ce qu'il vous faut pour piloter votre commerce</h2>
                 <p class="text-muted fs-6">Conçu pour éliminer les erreurs de caisse, les fraudes et les pertes de marchandises.</p>
             </div>
 
-            <div class="row g-4">
+            <div class="row g-3 g-md-4">
                 <div class="col-md-4">
                     <div class="stitch-card">
                         <div class="stitch-icon-box" style="background: rgba(75, 65, 225, 0.1); color: var(--stitch-secondary);">
@@ -664,7 +874,7 @@
                         </div>
                         <h5 class="fw-bold mb-2" style="color: var(--stitch-text-title);">Caisse &amp; POS Tactile</h5>
                         <p class="small text-muted mb-0">
-                            Interface fluide accessible sur ordinateur, tablette ou smartphone. Encaissement express et impression de reçus.
+                            Interface ultra fluide sur tablette, smartphone ou PC. Encaissement express en quelques clics.
                         </p>
                     </div>
                 </div>
@@ -676,7 +886,7 @@
                         </div>
                         <h5 class="fw-bold mb-2" style="color: var(--stitch-text-title);">Tableaux de Bord &amp; Marges</h5>
                         <p class="small text-muted mb-0">
-                            Chiffre d'affaires en temps réel, bénéfices nets, articles phares et historique des transactions.
+                            Chiffre d'affaires en temps réel, bénéfices nets, articles les plus vendus et analyses graphiques.
                         </p>
                     </div>
                 </div>
@@ -686,9 +896,9 @@
                         <div class="stitch-icon-box" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
                             <i class="fa-solid fa-user-shield"></i>
                         </div>
-                        <h5 class="fw-bold mb-2" style="color: var(--stitch-text-title);">Gestion des Rôles &amp; Droits</h5>
+                        <h5 class="fw-bold mb-2" style="color: var(--stitch-text-title);">Gestion des Rôles Sécurisés</h5>
                         <p class="small text-muted mb-0">
-                            Accès sécurisé pour Responsable, Vendeur et Magasinier. Confidentialité des marges et des données financières.
+                            Accès cloisonné pour Responsable, Vendeur et Magasinier. Marges et bilans financiers protégés.
                         </p>
                     </div>
                 </div>
@@ -700,7 +910,7 @@
                         </div>
                         <h5 class="fw-bold mb-2" style="color: var(--stitch-text-title);">Gestion Multi-Emplacements</h5>
                         <p class="small text-muted mb-0">
-                            Distinction claire entre stock Magasin et stock Boutique avec bordereaux de transfert inter-dépôts.
+                            Gestion distincte entre stock Magasin et stock Boutique avec bordereaux de transfert traçables.
                         </p>
                     </div>
                 </div>
@@ -710,9 +920,9 @@
                         <div class="stitch-icon-box" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
                             <i class="fa-solid fa-receipt"></i>
                         </div>
-                        <h5 class="fw-bold mb-2" style="color: var(--stitch-text-title);">Tickets &amp; Factures PDF / Thermiques</h5>
+                        <h5 class="fw-bold mb-2" style="color: var(--stitch-text-title);">Tickets Thermiques &amp; Factures</h5>
                         <p class="small text-muted mb-0">
-                            Impression directe pour imprimantes de caisse 58/80mm et export de factures normalisées au format PDF.
+                            Impression directe pour imprimantes de caisse 58/80mm et génération de factures PDF instantanées.
                         </p>
                     </div>
                 </div>
@@ -724,7 +934,7 @@
                         </div>
                         <h5 class="fw-bold mb-2" style="color: var(--stitch-text-title);">Triple Grille Tarifaire</h5>
                         <p class="small text-muted mb-0">
-                            Appliquez instantanément le prix Détail, Demi-gros ou Gros selon le volume acheté par votre client.
+                            Appliquez instantanément le prix Détail, Demi-gros ou Gros selon le profil du client au moment de l'encaissement.
                         </p>
                     </div>
                 </div>
@@ -732,15 +942,15 @@
         </div>
     </section>
 
-    <!-- OFFRES & TARIFS HORAS GROUP -->
-    <section class="py-5 my-5" id="tarifs">
+    <!-- OFFRES & TARIFS (HORAS GROUP) -->
+    <section class="py-5 my-3" id="tarifs">
         <div class="container">
             <div class="text-center mx-auto mb-5" style="max-width: 700px;">
                 <span class="hero-badge-pill">
-                    <i class="fa-solid fa-tags"></i> Transparence &amp; Flexibilité
+                    <i class="fa-solid fa-tags"></i> Transparence Totale
                 </span>
-                <h2 class="fw-bold mb-3" style="color: var(--stitch-text-title); font-size: 2.3rem;">Nos Formules d'Abonnement</h2>
-                <p class="text-muted fs-6">Des forfaits adaptés à la taille de votre établissement avec assistance locale garantie par HORAS GROUP.</p>
+                <h2 class="fw-bold mb-3" style="color: var(--stitch-text-title); font-size: 2.2rem;">Nos Formules &amp; Tarifs Mensuels</h2>
+                <p class="text-muted fs-6">Des formules claires en FCFA sans frais cachés, avec assistance locale permanente par HORAS GROUP.</p>
             </div>
 
             <div class="row g-4 align-items-stretch">
@@ -781,7 +991,7 @@
                         <span class="stitch-popular-ribbon">LE PLUS POPULAIRE ⭐</span>
                         <div>
                             <div class="fw-bold fs-4 mb-1" style="color: var(--stitch-text-title);">PRO</div>
-                            <p class="small text-muted mb-4">Pour magasins actifs souhaitant booster leurs performances</p>
+                            <p class="small text-muted mb-4">Pour magasins actifs souhaitant booster leurs ventes</p>
                             
                             <div class="d-flex align-items-baseline gap-2 mb-4">
                                 <span class="fs-1 fw-black brand-font" style="color: var(--stitch-secondary); font-weight: 900;">10 000</span>
@@ -795,7 +1005,6 @@
                                 <li><i class="fa-solid fa-check text-success me-2"></i> <strong>Gestion Multi-Emplacements (Dépôt + Boutique)</strong></li>
                                 <li><i class="fa-solid fa-check text-success me-2"></i> <strong>Triple grille de prix (Détail / Demi-gros / Gros)</strong></li>
                                 <li><i class="fa-solid fa-check text-success me-2"></i> <strong>Historique complet des mouvements &amp; clôtures</strong></li>
-                                <li><i class="fa-solid fa-check text-success me-2"></i> <strong>Multi-utilisateurs avec permissions dédiées</strong></li>
                                 <li><i class="fa-solid fa-check text-success me-2"></i> Support prioritaire 7j/7</li>
                             </ul>
                         </div>
@@ -808,12 +1017,12 @@
                     </div>
                 </div>
 
-                <!-- ENTERPRISE / MAX -->
+                <!-- ENTREPRISE / MAX -->
                 <div class="col-lg-4">
                     <div class="stitch-pricing-card">
                         <div>
-                            <div class="fw-bold fs-4 mb-1" style="color: var(--stitch-text-title);">ENTREPRISE / MAX</div>
-                            <p class="small text-muted mb-4">Pour grossistes, réseaux multi-boutiques et supermarchés</p>
+                            <div class="fw-bold fs-4 mb-1" style="color: var(--stitch-text-title);">ENTREPRISE</div>
+                            <p class="small text-muted mb-4">Pour grossistes, supermarchés et réseaux de boutiques</p>
                             
                             <div class="d-flex align-items-baseline gap-2 mb-4">
                                 <span class="fs-1 fw-black brand-font text-primary" style="font-weight: 900;">15 000</span>
@@ -826,8 +1035,8 @@
                                 <li><i class="fa-solid fa-check text-success me-2"></i> <strong>Tout ce qui est inclus dans le Pro</strong></li>
                                 <li><i class="fa-solid fa-check text-success me-2"></i> <strong>Multi-succursales &amp; synchronisation cloud</strong></li>
                                 <li><i class="fa-solid fa-check text-success me-2"></i> <strong>Exportations comptables avancées &amp; PDF</strong></li>
-                                <li><i class="fa-solid fa-check text-success me-2"></i> <strong>Formation complète sur site de vos équipes</strong></li>
-                                <li><i class="fa-solid fa-check text-success me-2"></i> Accompagnement personnalisé HORAS GROUP</li>
+                                <li><i class="fa-solid fa-check text-success me-2"></i> <strong>Formation sur site de vos équipes</strong></li>
+                                <li><i class="fa-solid fa-check text-success me-2"></i> Accompagnement dédié HORAS GROUP</li>
                             </ul>
                         </div>
 
@@ -842,20 +1051,20 @@
         </div>
     </section>
 
-    <!-- CONTACT & RÉASSURANCE (HORAS GROUP) -->
-    <section class="py-5 my-4" id="contact">
+    <!-- CONTACT & SUPPORT LOCAL HORAS GROUP -->
+    <section class="py-5 my-3" id="contact">
         <div class="container">
-            <div class="p-5 rounded-4 border position-relative overflow-hidden" style="background: var(--stitch-surface-card); border-color: var(--stitch-card-border) !important; box-shadow: var(--stitch-card-shadow);">
+            <div class="p-4 p-md-5 rounded-4 border position-relative overflow-hidden" style="background: var(--stitch-surface-card); border-color: var(--stitch-card-border) !important; box-shadow: var(--stitch-card-shadow);">
                 <div class="row align-items-center gy-4 position-relative" style="z-index: 2;">
                     <div class="col-lg-7">
                         <span class="hero-badge-pill mb-3">
                             <i class="fa-solid fa-location-dot"></i> Contact &amp; Support Local
                         </span>
-                        <h2 class="fw-bold mb-3" style="color: var(--stitch-text-title); font-size: 2.2rem;">
+                        <h2 class="fw-bold mb-3" style="color: var(--stitch-text-title); font-size: 2.1rem;">
                             Prêt à digitaliser votre commerce avec SmartStock ?
                         </h2>
                         <p class="text-muted mb-4 fs-6">
-                            Contactez notre équipe <strong>HORAS GROUP</strong> à Lomé pour une démonstration ou pour équiper votre établissement en caisses tactiles et imprimantes.
+                            Rencontrez notre équipe <strong>HORAS GROUP</strong> à Lomé pour une démonstration personnalisée ou pour équiper votre établissement en caisses et imprimantes.
                         </p>
 
                         <div class="row g-3 small">
@@ -866,7 +1075,7 @@
                                     </div>
                                     <div>
                                         <strong style="color: var(--stitch-text-title);">Adresse :</strong><br>
-                                        <span class="text-muted">Lomé - Togo</span>
+                                        <span class="text-muted">Lomé — Togo</span>
                                     </div>
                                 </div>
                             </div>
@@ -898,7 +1107,7 @@
                                         <i class="fa-solid fa-building"></i>
                                     </div>
                                     <div>
-                                        <strong style="color: var(--stitch-text-title);">Entreprise éditrice :</strong><br>
+                                        <strong style="color: var(--stitch-text-title);">Éditeur :</strong><br>
                                         <span class="text-muted">HORAS GROUP (Togo)</span>
                                     </div>
                                 </div>
