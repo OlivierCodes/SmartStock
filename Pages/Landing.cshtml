@@ -29,7 +29,7 @@
             --stitch-surface: #f8f9ff;
             --stitch-surface-container: #eff4ff;
             --stitch-surface-card: #ffffff;
-            --stitch-card-border: rgba(64, 89, 170, 0.12);
+            --stitch-card-border: rgba(64, 89, 170, 0.14);
             --stitch-card-shadow: 0 10px 30px -5px rgba(0, 35, 111, 0.06), 0 4px 12px -2px rgba(0, 35, 111, 0.03);
             --stitch-card-shadow-hover: 0 25px 50px -12px rgba(75, 65, 225, 0.18);
             --stitch-primary: #00236f;
@@ -39,24 +39,22 @@
             --stitch-tertiary: #004a31;
             --stitch-tertiary-accent: #27c38a;
             --stitch-text-title: #0b1c30;
-            --stitch-text-body: #444651;
-            --stitch-text-muted: #757682;
-            --stitch-nav-bg: rgba(248, 249, 255, 0.9);
+            --stitch-text-body: #2d3748;
+            --stitch-text-muted: #5a6578;
+            --stitch-nav-bg: rgba(248, 249, 255, 0.92);
             --stitch-hero-bg: radial-gradient(circle at 10% 20%, rgba(75, 65, 225, 0.1) 0%, transparent 50%), radial-gradient(circle at 90% 80%, rgba(39, 195, 138, 0.12) 0%, transparent 50%), linear-gradient(135deg, #eff4ff 0%, #f8f9ff 50%, #e5eeff 100%);
-            --stitch-footer-bg: #0b1c30;
-            --stitch-footer-text: #cbdbf5;
             --mockup-bg: #f8fafc;
             --mockup-card: #ffffff;
-            --mockup-border: #e2e8f0;
+            --mockup-border: #cbd5e1;
             --mockup-text-main: #0f172a;
-            --mockup-text-sub: #64748b;
+            --mockup-text-sub: #475569;
         }
 
         [data-theme="dark"] {
             --stitch-surface: #070d18;
             --stitch-surface-container: #0d1728;
             --stitch-surface-card: #111d32;
-            --stitch-card-border: rgba(255, 255, 255, 0.08);
+            --stitch-card-border: rgba(255, 255, 255, 0.1);
             --stitch-card-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.5);
             --stitch-card-shadow-hover: 0 25px 50px -10px rgba(75, 65, 225, 0.35);
             --stitch-primary: #b6c4ff;
@@ -66,17 +64,15 @@
             --stitch-tertiary: #6ffbbe;
             --stitch-tertiary-accent: #4edea3;
             --stitch-text-title: #f8f9ff;
-            --stitch-text-body: #d3e4fe;
-            --stitch-text-muted: #94a3b8;
-            --stitch-nav-bg: rgba(7, 13, 24, 0.92);
+            --stitch-text-body: #e2e8f0;
+            --stitch-text-muted: #a0aec0;
+            --stitch-nav-bg: rgba(7, 13, 24, 0.94);
             --stitch-hero-bg: radial-gradient(circle at 10% 20%, rgba(75, 65, 225, 0.2) 0%, transparent 50%), radial-gradient(circle at 90% 80%, rgba(39, 195, 138, 0.15) 0%, transparent 50%), linear-gradient(135deg, #070d18 0%, #0d1728 50%, #070d18 100%);
-            --stitch-footer-bg: #040810;
-            --stitch-footer-text: #94a3b8;
             --mockup-bg: #0b1324;
             --mockup-card: #131f38;
-            --mockup-border: #1e293b;
+            --mockup-border: #243452;
             --mockup-text-main: #f8fafc;
-            --mockup-text-sub: #94a3b8;
+            --mockup-text-sub: #cbd5e1;
         }
 
         * {
@@ -131,41 +127,6 @@
             overflow: hidden;
         }
 
-        .stitch-blob {
-            position: absolute;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.18;
-        }
-
-        .stitch-blob-1 {
-            top: 5%;
-            left: -5%;
-            width: 450px;
-            height: 450px;
-            color: var(--stitch-secondary);
-            animation: spinClockwise 60s linear infinite;
-        }
-
-        .stitch-blob-2 {
-            bottom: 5%;
-            right: -5%;
-            width: 550px;
-            height: 550px;
-            color: var(--stitch-tertiary-accent);
-            animation: spinCounterClockwise 45s linear infinite;
-        }
-
-        @@keyframes spinClockwise {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        @@keyframes spinCounterClockwise {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(-360deg); }
-        }
-
         .ambient-glow-1 {
             position: absolute;
             top: -10%;
@@ -191,7 +152,7 @@
         }
 
         .hero-badge-pill {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(75, 65, 225, 0.25);
             color: var(--stitch-secondary);
@@ -241,13 +202,13 @@
         }
 
         .btn-stitch-outline {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(12px);
             color: var(--stitch-secondary) !important;
             font-weight: 700;
             border-radius: 9999px;
             padding: 13px 28px;
-            border: 2px solid rgba(75, 65, 225, 0.2);
+            border: 2px solid rgba(75, 65, 225, 0.25);
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
@@ -263,7 +224,7 @@
             box-shadow: 0 8px 20px rgba(75, 65, 225, 0.15);
         }
 
-        /* 3D Browser Mockup with Real Native Dashboard UI */
+        /* 3D Browser Mockup */
         .stitch-perspective-wrap {
             perspective: 1600px;
             width: 100%;
@@ -306,7 +267,7 @@
             white-space: nowrap;
         }
 
-        /* Native Live Dashboard Preview Inside Mockup */
+        /* Mockup Contents */
         .mockup-dashboard-content {
             padding: 18px;
             font-size: 0.85rem;
@@ -319,9 +280,6 @@
             padding: 14px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.03);
             transition: all 0.2s ease;
-        }
-        .mockup-kpi-card:hover {
-            transform: translateY(-2px);
         }
 
         .mockup-icon {
@@ -345,7 +303,7 @@
             font-weight: 700;
         }
 
-        /* Trust / Stats Metric Strip */
+        /* Metric Strip */
         .stitch-metrics-section {
             background: var(--stitch-surface-card);
             border-top: 1px solid var(--stitch-card-border);
@@ -367,7 +325,7 @@
             box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
         }
 
-        /* Modern Feature Cards */
+        /* Feature Cards */
         .stitch-card {
             background: var(--stitch-surface-card);
             border: 1px solid var(--stitch-card-border);
@@ -441,17 +399,67 @@
             white-space: nowrap;
         }
 
-        /* Footer */
+        /* ── FOOTER AVEC CONTRASTE ÉLEVÉ & LISIBILITÉ PARFAITE ── */
         .stitch-footer {
-            background: var(--stitch-footer-bg);
-            color: var(--stitch-footer-text);
+            background: #081120 !important;
+            color: #f1f5f9 !important;
             border-radius: 36px 36px 0 0;
             padding: 70px 0 35px 0;
             position: relative;
             z-index: 10;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Media Queries for 100% Responsiveness */
+        .stitch-footer h4, .stitch-footer h5 {
+            color: #ffffff !important;
+            font-weight: 800;
+        }
+
+        .stitch-footer p {
+            color: #cbd5e1 !important;
+            font-size: 0.92rem;
+            line-height: 1.7;
+        }
+
+        .stitch-footer .footer-link {
+            color: #cbd5e1 !important;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .stitch-footer .footer-link:hover {
+            color: #60a5fa !important;
+            transform: translateX(4px);
+        }
+
+        .stitch-footer .footer-contact-card {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 14px;
+            padding: 14px 16px;
+            color: #f8fafc !important;
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        .stitch-footer .footer-contact-card a {
+            color: #4edea3 !important;
+            text-decoration: none;
+            font-weight: 700;
+        }
+        .stitch-footer .footer-contact-card a:hover {
+            text-decoration: underline;
+        }
+
+        .stitch-footer .footer-bottom-text {
+            color: #94a3b8 !important;
+            font-size: 0.85rem;
+        }
+
+        /* Media Queries Responsiveness */
         @@media (max-width: 991.98px) {
             .stitch-browser-mockup {
                 transform: none !important;
@@ -1128,10 +1136,11 @@
         </div>
     </section>
 
-    <!-- FOOTER -->
+    <!-- FOOTER ULTRA-LISIBLE ET CONTRASTÉ -->
     <footer class="stitch-footer">
         <div class="container">
             <div class="row gy-4 mb-5 text-start">
+                <!-- Col 1: SmartStock info -->
                 <div class="col-lg-4">
                     <div class="d-flex align-items-center gap-3 mb-3">
                         <div class="stitch-logo-box">
@@ -1139,41 +1148,43 @@
                         </div>
                         <h4 class="fw-bold text-white mb-0 brand-font">SmartStock</h4>
                     </div>
-                    <p class="small text-muted mb-3" style="line-height: 1.7;">
-                        Système intelligent de gestion commerciale, encaissement tactile et suivi des stocks en temps réel édité par <strong>HORAS GROUP</strong>.
+                    <p class="mb-3">
+                        Système intelligent de gestion commerciale, encaissement tactile et suivi des stocks en temps réel édité par <strong class="text-white">HORAS GROUP</strong>.
                     </p>
-                    <div class="small p-3 rounded-3" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
-                        <strong>Contact :</strong> +228 98 84 59 32 / +228 93 00 43 63<br>
-                        <strong>Email :</strong> horatio.sossou@yahoo.com
+                    <div class="footer-contact-card">
+                        <div class="mb-1"><i class="fa-solid fa-phone text-success me-2"></i><strong>Contact :</strong> <a href="tel:+22898845932">+228 98 84 59 32</a> / <a href="tel:+22893004363">+228 93 00 43 63</a></div>
+                        <div><i class="fa-solid fa-envelope text-primary me-2"></i><strong>Email :</strong> <a href="mailto:horatio.sossou@yahoo.com">horatio.sossou@yahoo.com</a></div>
                     </div>
                 </div>
 
+                <!-- Col 2: Navigation -->
                 <div class="col-lg-4">
                     <h5 class="fw-bold text-white mb-3 brand-font">Navigation &amp; Modules</h5>
-                    <ul class="list-unstyled small" style="line-height: 2.2;">
-                        <li><a href="#fonctionnalites" class="text-decoration-none text-muted hover-light"><i class="fa-solid fa-angle-right me-2 text-primary"></i> Point de Vente (POS) &amp; Caisse</a></li>
-                        <li><a href="#fonctionnalites" class="text-decoration-none text-muted hover-light"><i class="fa-solid fa-angle-right me-2 text-primary"></i> Suivi des Stocks Dépôt / Boutique</a></li>
-                        <li><a href="#tarifs" class="text-decoration-none text-muted hover-light"><i class="fa-solid fa-angle-right me-2 text-primary"></i> Formules Standard, Pro &amp; Entreprise</a></li>
-                        <li><a href="#contact" class="text-decoration-none text-muted hover-light"><i class="fa-solid fa-angle-right me-2 text-primary"></i> Assistance Technique HORAS GROUP</a></li>
+                    <ul class="list-unstyled mb-0" style="line-height: 2.2;">
+                        <li><a href="#fonctionnalites" class="footer-link"><i class="fa-solid fa-angle-right me-2 text-primary"></i> Point de Vente (POS) &amp; Caisse</a></li>
+                        <li><a href="#fonctionnalites" class="footer-link"><i class="fa-solid fa-angle-right me-2 text-primary"></i> Suivi des Stocks Dépôt / Boutique</a></li>
+                        <li><a href="#tarifs" class="footer-link"><i class="fa-solid fa-angle-right me-2 text-primary"></i> Formules Standard, Pro &amp; Entreprise</a></li>
+                        <li><a href="#contact" class="footer-link"><i class="fa-solid fa-angle-right me-2 text-primary"></i> Assistance Technique HORAS GROUP</a></li>
                     </ul>
                 </div>
 
+                <!-- Col 3: Espace Gestion -->
                 <div class="col-lg-4">
                     <h5 class="fw-bold text-white mb-3 brand-font">Espace Gestion</h5>
-                    <p class="small text-muted mb-3">Accédez directement à votre tableau de bord commercial SmartStock.</p>
+                    <p class="mb-3">Accédez directement à votre tableau de bord commercial SmartStock ou contactez le support.</p>
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="/Login" class="btn btn-outline-light rounded-pill px-4 py-2 small fw-semibold">
+                        <a href="/Login" class="btn btn-outline-light rounded-pill px-4 py-2 small fw-bold">
                             <i class="fa-solid fa-lock me-1"></i> Connexion Backoffice
                         </a>
-                        <a href="#contact" class="btn-stitch-primary px-4 py-2 small fw-bold" style="box-shadow: none;">
+                        <a href="#contact" class="btn btn-stitch-primary px-4 py-2 small fw-bold" style="box-shadow: none;">
                             <i class="fa-solid fa-phone me-1"></i> Nous contacter
                         </a>
                     </div>
                 </div>
             </div>
 
-            <div class="border-top pt-4 text-center small" style="border-color: rgba(255, 255, 255, 0.1) !important; color: rgba(255, 255, 255, 0.5);">
-                © @DateTime.Now.Year HORAS GROUP • SmartStock. Tous droits réservés.
+            <div class="border-top pt-4 text-center footer-bottom-text" style="border-color: rgba(255, 255, 255, 0.15) !important;">
+                © @DateTime.Now.Year <strong class="text-white">HORAS GROUP</strong> • SmartStock. Tous droits réservés.
             </div>
         </div>
     </footer>
