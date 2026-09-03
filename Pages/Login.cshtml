@@ -4,66 +4,410 @@
     ViewData["Title"] = "Connexion";
 }
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="light">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SmartStock – @ViewData["Title"]</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/login.css" />
+    <title>Connexion — SmartStock | HORAS GROUP</title>
+    
+    <!-- Google Fonts: Inter & Space Grotesk -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        const storedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', storedTheme);
+    </script>
+    
+    <style>
+        :root, [data-theme="light"] {
+            --stitch-surface: #f8f9ff;
+            --stitch-surface-container: #eff4ff;
+            --stitch-surface-card: rgba(255, 255, 255, 0.9);
+            --stitch-card-border: rgba(64, 89, 170, 0.15);
+            --stitch-card-shadow: 0 20px 40px -10px rgba(0, 35, 111, 0.1), 0 8px 20px -4px rgba(0, 35, 111, 0.05);
+            --stitch-primary: #00236f;
+            --stitch-secondary: #4b41e1;
+            --stitch-secondary-container: #645efb;
+            --stitch-tertiary-accent: #27c38a;
+            --stitch-text-title: #0b1c30;
+            --stitch-text-body: #444651;
+            --stitch-text-muted: #757682;
+            --stitch-hero-bg: radial-gradient(circle at 10% 20%, rgba(75, 65, 225, 0.12) 0%, transparent 50%), radial-gradient(circle at 90% 80%, rgba(39, 195, 138, 0.14) 0%, transparent 50%), linear-gradient(135deg, #eff4ff 0%, #f8f9ff 50%, #e5eeff 100%);
+            --input-bg: #ffffff;
+            --input-border: rgba(64, 89, 170, 0.2);
+            --input-focus: #4b41e1;
+        }
+
+        [data-theme="dark"] {
+            --stitch-surface: #070d18;
+            --stitch-surface-container: #0d1728;
+            --stitch-surface-card: rgba(17, 29, 50, 0.85);
+            --stitch-card-border: rgba(255, 255, 255, 0.1);
+            --stitch-card-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.6);
+            --stitch-primary: #b6c4ff;
+            --stitch-secondary: #8b85ff;
+            --stitch-secondary-container: #4b41e1;
+            --stitch-tertiary-accent: #4edea3;
+            --stitch-text-title: #f8f9ff;
+            --stitch-text-body: #d3e4fe;
+            --stitch-text-muted: #94a3b8;
+            --stitch-hero-bg: radial-gradient(circle at 10% 20%, rgba(75, 65, 225, 0.2) 0%, transparent 50%), radial-gradient(circle at 90% 80%, rgba(39, 195, 138, 0.15) 0%, transparent 50%), linear-gradient(135deg, #070d18 0%, #0d1728 50%, #070d18 100%);
+            --input-bg: rgba(13, 23, 40, 0.8);
+            --input-border: rgba(255, 255, 255, 0.15);
+            --input-focus: #8b85ff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--stitch-hero-bg);
+            color: var(--stitch-text-body);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            padding: 2rem 1rem 1.5rem 1rem;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        h1, h2, h3, .brand-font {
+            font-family: 'Space Grotesk', 'Inter', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        /* Ambient Animated Glows */
+        .ambient-glow-1 {
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            border-radius: 50%;
+            background: rgba(75, 65, 225, 0.15);
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .ambient-glow-2 {
+            position: absolute;
+            bottom: -10%;
+            right: -10%;
+            width: 50vw;
+            height: 50vw;
+            border-radius: 50%;
+            background: rgba(39, 195, 138, 0.12);
+            filter: blur(120px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Top Action Bar */
+        .top-bar {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            margin-bottom: 1.5rem;
+        }
+
+        .back-link {
+            color: var(--stitch-text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--stitch-surface-card);
+            border: 1px solid var(--stitch-card-border);
+            border-radius: 9999px;
+            backdrop-filter: blur(12px);
+            transition: all 0.2s ease;
+        }
+        .back-link:hover {
+            color: var(--stitch-secondary);
+            border-color: var(--stitch-secondary);
+            transform: translateX(-3px);
+        }
+
+        /* Login Card */
+        .login-card-stitch {
+            width: 100%;
+            max-width: 460px;
+            background: var(--stitch-surface-card);
+            border: 1px solid var(--stitch-card-border);
+            border-radius: 28px;
+            padding: 2.8rem 2.4rem;
+            box-shadow: var(--stitch-card-shadow);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: relative;
+            z-index: 10;
+            animation: cardAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @@keyframes cardAppear {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .stitch-logo-box {
+            background: linear-gradient(135deg, #4b41e1, #27c38a);
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            box-shadow: 0 10px 22px rgba(75, 65, 225, 0.35);
+            margin: 0 auto 1rem auto;
+        }
+
+        .login-title {
+            color: var(--stitch-text-title);
+            font-size: 1.85rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .input-group-stitch {
+            margin-bottom: 1.3rem;
+            text-align: left;
+        }
+
+        .input-group-stitch label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--stitch-text-title);
+            margin-bottom: 0.4rem;
+        }
+
+        .input-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-box i {
+            position: absolute;
+            left: 1.1rem;
+            color: var(--stitch-text-muted);
+            font-size: 1rem;
+            pointer-events: none;
+            transition: color 0.2s ease;
+        }
+
+        .input-box input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1.5px solid var(--input-border);
+            border-radius: 14px;
+            padding: 0.85rem 1rem 0.85rem 2.8rem;
+            color: var(--stitch-text-title);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .input-box input:focus {
+            border-color: var(--input-focus);
+            box-shadow: 0 0 0 4px rgba(75, 65, 225, 0.15);
+        }
+
+        .input-box input:focus + i,
+        .input-box input:focus ~ i {
+            color: var(--input-focus);
+        }
+
+        .btn-stitch-submit {
+            background: linear-gradient(135deg, #4b41e1 0%, #645efb 100%);
+            color: #ffffff !important;
+            font-weight: 700;
+            border-radius: 14px;
+            padding: 0.95rem 1.5rem;
+            border: none;
+            width: 100%;
+            box-shadow: 0 10px 24px rgba(75, 65, 225, 0.35);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 0.5rem;
+        }
+
+        .btn-stitch-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(75, 65, 225, 0.45);
+        }
+
+        .btn-stitch-submit:active {
+            transform: translateY(0);
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.6rem;
+            border-radius: 14px;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.92rem;
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.35);
+            z-index: 1000;
+            animation: slideToast 0.3s ease-out;
+            backdrop-filter: blur(12px);
+        }
+
+        .toast-success {
+            background: rgba(39, 195, 138, 0.95);
+            border: 1px solid rgba(39, 195, 138, 0.4);
+        }
+
+        .toast-error {
+            background: rgba(239, 68, 68, 0.95);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .toast-info {
+            background: rgba(75, 65, 225, 0.95);
+            border: 1px solid rgba(75, 65, 225, 0.4);
+        }
+
+        @@keyframes slideToast {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Login Footer */
+        .login-page-footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--stitch-text-muted);
+            line-height: 1.6;
+            z-index: 10;
+        }
+
+        .login-page-footer strong {
+            color: var(--stitch-text-title);
+        }
+    </style>
 </head>
 <body>
-    <div class="background-shapes">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
-        <div class="shape shape-3"></div>
+    <!-- Ambient Floating Glows -->
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+
+    <!-- Top Navigation Bar -->
+    <div class="top-bar">
+        <a href="/Landing" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Retour à l'accueil</span>
+        </a>
+
+        <button class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center p-2 border" id="themeToggleBtn" type="button" title="Changer le thème" style="width: 38px; height: 38px; border-color: var(--stitch-card-border) !important; background: var(--stitch-surface-card);">
+            <i class="fa-solid fa-moon text-warning" id="themeIcon"></i>
+        </button>
     </div>
-    
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <h2>SmartStock</h2>
-                <p>Bienvenue. Connectez-vous pour continuer.</p>
+
+    <!-- Center Card -->
+    <div class="login-card-stitch">
+        <div class="text-center mb-4">
+            <div class="stitch-logo-box">
+                <i class="fa-solid fa-boxes-stacked fs-4"></i>
             </div>
-            
-            <form onsubmit="login(event)" class="login-form">
-                <div class="input-group">
-                    <label for="login-email">Adresse Email</label>
-                    <div class="input-wrapper">
-                        <input type="email" id="login-email" placeholder="nom@entreprise.com" required autocomplete="email" />
-                        <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                    </div>
-                </div>
-                
-                <div class="input-group">
-                    <label for="login-password">Mot de passe</label>
-                    <div class="input-wrapper">
-                        <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password" />
-                        <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                    </div>
-                </div>
-                
-                <div class="form-actions">
-
-                    <a href="#" class="forgot-password" style="margin-left: auto;">Mot de passe oublié ?</a>
-                </div>
-
-
-                
-                <button type="submit" class="btn-primary">
-                    <span>Se connecter</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                </button>
-            </form>
+            <h1 class="login-title">SmartStock</h1>
+            <div class="d-inline-block px-3 py-1 rounded-pill small fw-bold mb-2" style="background: rgba(75, 65, 225, 0.1); color: var(--stitch-secondary); font-size: 0.8rem;">
+                Propulsé par HORAS GROUP
+            </div>
+            <p class="small text-muted mb-0">Espace de gestion commerciale &amp; caisse</p>
         </div>
+
+        <form onsubmit="login(event)">
+            <div class="input-group-stitch">
+                <label for="login-email">Adresse Email</label>
+                <div class="input-box">
+                    <input type="email" id="login-email" placeholder="nom@entreprise.com" required autocomplete="email" />
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
+            </div>
+
+            <div class="input-group-stitch">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label for="login-password" class="mb-0">Mot de passe</label>
+                    <a href="mailto:horatio.sossou@yahoo.com?subject=Demande%20de%20réinitialisation%20SmartStock" class="small text-decoration-none fw-semibold" style="color: var(--stitch-secondary); font-size: 0.78rem;">
+                        Mot de passe oublié ?
+                    </a>
+                </div>
+                <div class="input-box">
+                    <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password" />
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-stitch-submit">
+                <span>Se connecter</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </form>
     </div>
-    
+
+    <!-- Toast message container -->
     <div id="toast" class="toast" style="display:none;"></div>
-    <footer style="position: absolute; bottom: 1rem; width: 100%; text-align: center; color: #a0a0ff; font-size: 0.85rem; line-height: 1.5;">
-        <div style="font-weight: 600; color: #e0e0ff; margin-bottom: 0.2rem;">Provided by HORAS GROUP</div>
-        <div>Téléphone : +228 98 84 59 32 / +228 93 00 43 63</div>
-        <div>E-mail : horatio.sossou@yahoo.com</div>
+
+    <!-- Footer HORAS GROUP -->
+    <footer class="login-page-footer">
+        <div>Provided by <strong>HORAS GROUP</strong></div>
+        <div><i class="fa-solid fa-phone me-1"></i> +228 98 84 59 32 / +228 93 00 43 63 &nbsp;•&nbsp; <i class="fa-solid fa-envelope me-1"></i> horatio.sossou@yahoo.com</div>
+        <div class="mt-1" style="font-size: 0.78rem; opacity: 0.8;">Lomé — Togo</div>
     </footer>
+
+    <!-- Scripts -->
     <script src="/script.js"></script>
+    <script>
+        function updateTheme(theme) {
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                if (theme === 'dark') {
+                    icon.className = 'fa-solid fa-sun text-warning';
+                } else {
+                    icon.className = 'fa-solid fa-moon text-warning';
+                }
+            }
+        }
+
+        const initialTheme = localStorage.getItem('theme') || 'light';
+        updateTheme(initialTheme);
+
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', function() {
+                const current = document.documentElement.getAttribute('data-theme') || 'light';
+                const next = current === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', next);
+                localStorage.setItem('theme', next);
+                updateTheme(next);
+            });
+        }
+    </script>
 </body>
 </html>
