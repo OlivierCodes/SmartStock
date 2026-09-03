@@ -235,7 +235,7 @@ app.MapRazorPages();
 
 app.MapGet("/", context =>
 {
-    context.Response.Redirect("/Login");
+    context.Response.Redirect("/Landing");
     return Task.CompletedTask;
 });
 
